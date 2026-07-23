@@ -65,6 +65,60 @@ interface StoreData {
   currentToyId: string | null
 }
 
+const LUNA_DEMO_UPDATES: Record<string, Partial<Entry>> = {
+  entry_luna_disney: {
+    location: '蓝色海湾',
+    title: '海风吹过的下午',
+    userNote:
+      '第一次一起坐船出发，我戴上小草帽，把蓝色的海和风都收进了今天。',
+    imageUrl: '/toy-cards/highlight-1.jpg',
+    aiDiary:
+      '2026年7月23日，蓝色海湾。\n\n第一次一起坐船出发，我戴上小草帽，看海风从我们身边跑过去。蓝色的海很大，但你的手心刚刚好。',
+  },
+  entry_luna_hangzhou: {
+    location: '阳光海岸',
+    title: '把浪花装进口袋',
+    userNote:
+      '海水一次次跑上沙滩，我们把阳光、浪花和想念都收藏在了这张照片里。',
+    imageUrl: '/toy-cards/highlight-2.jpg',
+    aiDiary:
+      '2026年6月8日，阳光海岸。\n\n海水一次次跑上沙滩，我们把阳光、浪花和想念都收藏在了这张照片里。以后看到蓝色，我就会想起今天。',
+  },
+  entry_gulangyu: {
+    location: '森林瀑布',
+    title: '藏在绿意里的瀑布',
+    userNote:
+      '我们一起穿过绿色的小路，终于找到了藏在森林深处的瀑布。',
+    imageUrl: '/toy-cards/highlight-3.jpg',
+    aiDiary:
+      '2026年4月3日，森林瀑布。\n\n我们一起穿过绿色的小路，终于找到了藏在森林深处的瀑布。水声很响，可是被你拿在手里时，我一点也不害怕。',
+  },
+}
+
+const REMOVED_DEMO_TOY_IDS = new Set([
+  'toy_moka_demo',
+  'toy_yuki_demo',
+  'toy_pipi_demo',
+])
+
+function applyDemoUpdates(data: StoreData) {
+  data.toys = data.toys.filter((toy) => !REMOVED_DEMO_TOY_IDS.has(toy.id))
+  data.entries = data.entries.filter(
+    (entry) => !REMOVED_DEMO_TOY_IDS.has(entry.toyId),
+  )
+  if (
+    data.currentToyId &&
+    !data.toys.some((toy) => toy.id === data.currentToyId)
+  ) {
+    data.currentToyId = data.toys[0]?.id ?? null
+  }
+  data.entries.forEach((entry) => {
+    const update = LUNA_DEMO_UPDATES[entry.id]
+    if (update) Object.assign(entry, update)
+  })
+  return data
+}
+
 function seed(): StoreData {
   const lunaId = 'toy_luna_demo'
   const beanId = 'toy_bean_demo'
@@ -142,14 +196,13 @@ function seed(): StoreData {
       toyId: lunaId,
       type: 'travel',
       date: '2026-04-03',
-      location: '鼓浪屿',
-      title: '橘子汽水色的天空',
-      userNote: '和主人看日落',
+      location: '森林瀑布',
+      title: '藏在绿意里的瀑布',
+      userNote: '我们一起穿过绿色的小路，终于找到了藏在森林深处的瀑布。',
       mood: '平静',
-      imageUrl:
-        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+      imageUrl: '/toy-cards/highlight-3.jpg',
       aiDiary:
-        '2026年4月3日，鼓浪屿。\n\n今天主人带我来看日落。海风有点大，但我终于知道，太阳回家时，天空会变成橘子汽水的颜色。\n\n我想，以后每次看到这种颜色，都会想起你的手。',
+        '2026年4月3日，森林瀑布。\n\n我们一起穿过绿色的小路，终于找到了藏在森林深处的瀑布。水声很响，可是被你拿在手里时，我一点也不害怕。',
       createdAt: '2026-04-03T18:30:00.000Z',
     },
     {
@@ -170,14 +223,13 @@ function seed(): StoreData {
       toyId: lunaId,
       type: 'memorial',
       date: '2026-07-23',
-      location: '上海迪士尼',
-      title: '我的生日',
-      userNote: '我们第一次相遇',
+      location: '蓝色海湾',
+      title: '海风吹过的下午',
+      userNote: '第一次一起坐船出发，我戴上小草帽，把蓝色的海和风都收进了今天。',
       mood: '开心',
-      imageUrl:
-        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80',
+      imageUrl: '/toy-cards/highlight-1.jpg',
       aiDiary:
-        '2026年7月23日，上海迪士尼。\n\n这是我被写进故事的第一天。烟花很吵，我有点胆小，但主人把我抱得很紧。\n\n我想：原来「家」不是一个地方，是一双愿意带你走的手。',
+        '2026年7月23日，蓝色海湾。\n\n第一次一起坐船出发，我戴上小草帽，看海风从我们身边跑过去。蓝色的海很大，但你的手心刚刚好。',
       createdAt: '2026-07-23T20:00:00.000Z',
     },
     {
@@ -185,14 +237,13 @@ function seed(): StoreData {
       toyId: lunaId,
       type: 'travel',
       date: '2026-06-08',
-      location: '杭州西湖',
-      title: '伞下的雨',
-      userNote: '细雨断桥',
+      location: '阳光海岸',
+      title: '把浪花装进口袋',
+      userNote: '海水一次次跑上沙滩，我们把阳光、浪花和想念都收藏在了这张照片里。',
       mood: '平静',
-      imageUrl:
-        'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=800&q=80',
+      imageUrl: '/toy-cards/highlight-2.jpg',
       aiDiary:
-        '2026年6月8日，杭州西湖。\n\n雨点打在伞上像小鼓。我从口袋里探出眼睛，看见湖面被雨敲出很多圆圈。\n\n主人说这叫「断桥残雪」——虽然没有雪，但我决定记住这个湿漉漉的温柔。',
+        '2026年6月8日，阳光海岸。\n\n海水一次次跑上沙滩，我们把阳光、浪花和想念都收藏在了这张照片里。以后看到蓝色，我就会想起今天。',
       createdAt: '2026-06-08T11:20:00.000Z',
     },
     // —— 豆豆 ——
@@ -355,7 +406,7 @@ function seed(): StoreData {
     },
   ]
 
-  return { toys, entries, currentToyId: lunaId }
+  return applyDemoUpdates({ toys, entries, currentToyId: lunaId })
 }
 
 function load(): StoreData {
@@ -366,7 +417,7 @@ function load(): StoreData {
       save(s)
       return s
     }
-    return JSON.parse(raw) as StoreData
+    return applyDemoUpdates(JSON.parse(raw) as StoreData)
   } catch {
     const s = seed()
     save(s)

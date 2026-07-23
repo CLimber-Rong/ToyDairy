@@ -2,6 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppProvider } from './context/AppContext'
 import { AppLayout } from './layout/AppLayout'
 import { ComposePage } from './pages/ComposePage'
+import { CommunityPage } from './pages/CommunityPage'
+import { CommunityToyPage } from './pages/CommunityToyPage'
 import { EntryDetailPage } from './pages/EntryDetailPage'
 import { GrowthPage } from './pages/GrowthPage'
 import { MePage } from './pages/MePage'
@@ -22,6 +24,8 @@ export default function App() {
               <Route path="timeline" element={<TimelinePage />} />
               <Route path="growth" element={<GrowthPage />} />
               <Route path="compose" element={<ComposePage />} />
+              <Route path="community" element={<CommunityPage />} />
+              <Route path="community/toys/:id" element={<CommunityToyPage />} />
               <Route path="toys" element={<ToysPage />} />
               <Route path="toys/new" element={<NewToyPage />} />
               <Route path="entries/:id" element={<EntryDetailPage />} />

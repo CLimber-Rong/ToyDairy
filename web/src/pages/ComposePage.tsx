@@ -1,30 +1,34 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ImagePlus, X } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { ImagePlus, MapPin, X } from 'lucide-react'
 import { api } from '../api/client'
 import { PageHeader } from '../components/PageHeader'
 import { useApp } from '../context/AppContext'
-import type { EntryType } from '../types'
-import { ENTRY_TYPE_LABEL, MOOD_OPTIONS } from '../types'
 
-const TYPES: EntryType[] = ['travel', 'daily', 'text', 'memorial']
+interface ComposeRouteState {
+  mode?: 'photo' | 'text'
+  imageUrl?: string
+}
 
 export function ComposePage() {
   const nav = useNavigate()
+  const routeState = useLocation().state as ComposeRouteState | null
   const { currentToy, toys, setCurrentToyId, refreshEntries, showToast } =
     useApp()
-  const [type, setType] = useState<EntryType>('travel')
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [location, setLocation] = useState('')
-  const [title, setTitle] = useState('')
   const [userNote, setUserNote] = useState('')
-  const [mood, setMood] = useState('')
-  const [imageUrl, setImageUrl] = useState<string | undefined>()
+  const [imageUrl, setImageUrl] = useState<string | undefined>(routeState?.imageUrl)
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     if (!currentToy && toys[0]) setCurrentToyId(toys[0].id)
   }, [currentToy, toys, setCurrentToyId])
+
+  useEffect(() => {
+    if (routeState?.imageUrl) setImageUrl(routeState.imageUrl)
+    if (routeState?.mode === 'text') setImageUrl(undefined)
+  }, [routeState?.imageUrl, routeState?.mode])
 
   function onPickFile(file: File | null) {
     if (!file) return
@@ -48,16 +52,14 @@ export function ComposePage() {
     setSubmitting(true)
     try {
       const entry = await api.createEntry(currentToy.id, {
-        type,
+        type: imageUrl ? 'daily' : 'text',
         date,
         location: location.trim() || undefined,
-        title: title.trim() || undefined,
         userNote: userNote.trim() || undefined,
-        mood: mood || undefined,
         imageUrl,
       })
       await refreshEntries(currentToy.id)
-      showToast('日记已生成')
+      showToast('日志已生成')
       nav(`/entries/${entry.id}`)
     } catch (err) {
       showToast(err instanceof Error ? err.message : '保存失败')
@@ -79,8 +81,26 @@ export function ComposePage() {
 
   return (
     <>
-      <PageHeader title="编辑记录" back="/timeline" subtitle={currentToy.name} soft />
+      <PageHeader title="编辑记录" back="/timeline" soft />
       <form onSubmit={onSubmit} className="space-y-5 px-4 py-4">
+        {imageUrl && (
+          <div className="relative overflow-hidden rounded-[1.25rem] bg-cream-dark shadow-[var(--shadow-warm-sm)]">
+            <img
+              src={imageUrl}
+              alt="已选照片"
+              className="max-h-64 w-full object-cover"
+            />
+            <button
+              type="button"
+              onClick={() => setImageUrl(undefined)}
+              className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-ink/75 text-white backdrop-blur-sm"
+              aria-label="移除照片"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
         <div>
           <span className="mb-1.5 block text-xs font-medium text-ink-soft">
             关联玩偶
@@ -96,24 +116,6 @@ export function ComposePage() {
               </option>
             ))}
           </select>
-        </div>
-
-        <div>
-          <span className="mb-1.5 block text-xs font-medium text-ink-soft">
-            记录类型
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {TYPES.map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setType(t)}
-                className={type === t ? 'chip chip-active' : 'chip'}
-              >
-                {ENTRY_TYPE_LABEL[t]}
-              </button>
-            ))}
-          </div>
         </div>
 
         <label className="block">
@@ -132,76 +134,34 @@ export function ComposePage() {
           <span className="mb-1.5 block text-xs font-medium text-ink-soft">
             地点
           </span>
-          <input
-            className="input !rounded-2xl"
-            placeholder="例如：鼓浪屿"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
+          <div className="relative">
+            <MapPin className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+            <input
+              className="input !rounded-2xl !pl-10"
+              placeholder="例如：鼓浪屿"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+          </div>
         </label>
 
         <label className="block">
           <span className="mb-1.5 block text-xs font-medium text-ink-soft">
-            标题
-          </span>
-          <input
-            className="input !rounded-2xl"
-            placeholder="可选"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </label>
-
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-medium text-ink-soft">
-            补充描述
+            描述
           </span>
           <textarea
-            className="input min-h-[88px] resize-none !rounded-2xl"
+            className="input min-h-[120px] resize-none !rounded-2xl"
             placeholder="想对玩偶说的话…"
             value={userNote}
             onChange={(e) => setUserNote(e.target.value)}
           />
         </label>
 
-        <div>
-          <span className="mb-1.5 block text-xs font-medium text-ink-soft">
-            心情
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {MOOD_OPTIONS.map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setMood(mood === m ? '' : m)}
-                className={mood === m ? 'chip chip-soft-active' : 'chip'}
-              >
-                {m}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <span className="mb-1.5 block text-xs font-medium text-ink-soft">
-            照片
-          </span>
-          {imageUrl ? (
-            <div className="relative overflow-hidden rounded-2xl">
-              <img
-                src={imageUrl}
-                alt=""
-                className="max-h-48 w-full object-cover"
-              />
-              <button
-                type="button"
-                onClick={() => setImageUrl(undefined)}
-                className="absolute right-2 top-2 rounded-full bg-ink/80 p-1.5 text-white"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
+        {!imageUrl && routeState?.mode !== 'text' && (
+          <div>
+            <span className="mb-1.5 block text-xs font-medium text-ink-soft">
+              照片
+            </span>
             <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl bg-paper py-10 text-ink-muted shadow-[var(--shadow-warm-sm)] active:opacity-90">
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-mustard-soft text-matcha-deep">
                 <ImagePlus className="h-6 w-6" />
@@ -214,15 +174,15 @@ export function ComposePage() {
                 onChange={(e) => onPickFile(e.target.files?.[0] ?? null)}
               />
             </label>
-          )}
-        </div>
+          </div>
+        )}
 
         <button
           type="submit"
           disabled={submitting}
           className="btn-primary w-full py-3.5 text-sm"
         >
-          {submitting ? 'AI 写日记中…' : '保存并生成日记'}
+          {submitting ? '正在生成日志…' : '保存并生成日志'}
         </button>
       </form>
     </>
