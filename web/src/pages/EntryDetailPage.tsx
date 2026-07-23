@@ -55,7 +55,7 @@ export function EntryDetailPage() {
   if (loading || !entry) {
     return (
       <>
-        <PageHeader title="详情" back="/timeline" />
+        <PageHeader title="详情" back="/timeline" soft />
         <div className="py-16 text-center text-sm text-ink-muted">加载中…</div>
       </>
     )
@@ -66,6 +66,7 @@ export function EntryDetailPage() {
       <PageHeader
         title={entry.title || '日记详情'}
         back="/timeline"
+        soft
         right={
           <button
             type="button"
@@ -80,7 +81,7 @@ export function EntryDetailPage() {
       />
       <article className="px-4 py-4">
         {entry.imageUrl && (
-          <div className="mb-4 overflow-hidden rounded-2xl border border-line">
+          <div className="mb-4 overflow-hidden rounded-2xl shadow-[var(--shadow-warm)]">
             <img
               src={entry.imageUrl}
               alt=""
@@ -103,14 +104,14 @@ export function EntryDetailPage() {
         )}
 
         {entry.userNote && (
-          <p className="mb-4 rounded-xl bg-cream px-3.5 py-2.5 text-sm text-ink-soft">
+          <p className="mb-4 rounded-2xl bg-cream-dark px-3.5 py-2.5 text-sm text-ink-soft">
             <span className="text-xs text-ink-muted">主人备注 · </span>
             {entry.userNote}
           </p>
         )}
 
-        <div className="overflow-hidden rounded-2xl border border-line bg-paper">
-          <div className="bg-terra-soft px-4 py-3">
+        <div className="card-paper overflow-hidden">
+          <div className="bg-mustard-soft px-4 py-3">
             <h2 className="font-display text-base text-ink">玩偶日记</h2>
           </div>
           <div className="px-4 py-4">

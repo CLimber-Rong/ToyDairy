@@ -54,15 +54,18 @@ export function NewToyPage() {
 
   return (
     <>
-      <PageHeader title="新建玩偶" back />
+      <PageHeader title="新建玩偶" back soft />
       <form onSubmit={onSubmit} className="space-y-5 px-4 py-4">
-        <p className="rounded-2xl bg-terra-soft px-4 py-3 text-sm text-ink-soft">
-          填写基本信息后生成身份卡（星座 · 简介 · 独白）。
-        </p>
+        <div className="card-paper flex items-center gap-3 p-3.5">
+          <span className="text-3xl">🐻</span>
+          <p className="text-sm leading-relaxed text-ink-soft">
+            填写基本信息后，会生成可爱的身份卡（星座 · 简介 · 独白）。
+          </p>
+        </div>
 
         <Field label="玩偶名称">
           <input
-            className="input"
+            className="input !rounded-2xl"
             placeholder="例如：小熊 Luna"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -72,14 +75,14 @@ export function NewToyPage() {
         <Field label="出生日期">
           <input
             type="date"
-            className="input"
+            className="input !rounded-2xl"
             value={birthDate}
             onChange={(e) => setBirthDate(e.target.value)}
           />
         </Field>
         <Field label="出生地">
           <input
-            className="input"
+            className="input !rounded-2xl"
             placeholder="例如：上海迪士尼"
             value={birthPlace}
             onChange={(e) => setBirthPlace(e.target.value)}
@@ -117,10 +120,6 @@ export function NewToyPage() {
             })}
           </div>
         </Field>
-
-        <p className="text-xs text-ink-muted">
-          Mock AI 补全 · 后端就绪后走 POST /toys
-        </p>
 
         <button
           type="submit"

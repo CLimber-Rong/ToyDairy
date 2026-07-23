@@ -7,7 +7,7 @@ export function EntryCard({ entry }: { entry: Entry }) {
   return (
     <Link
       to={`/entries/${entry.id}`}
-      className="block overflow-hidden rounded-2xl border border-line bg-paper active:opacity-90"
+      className="card-paper block overflow-hidden active:scale-[0.99] transition-transform"
     >
       {entry.imageUrl && (
         <div className="aspect-[16/10] bg-cream-dark">

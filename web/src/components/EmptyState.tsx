@@ -12,8 +12,8 @@ export function EmptyState({
   action?: ReactNode
 }) {
   return (
-    <div className="flex flex-col items-center justify-center px-8 py-16 text-center">
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-cream-dark text-3xl">
+    <div className="flex flex-col items-center justify-center px-8 py-14 text-center">
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-[1.25rem] bg-mustard-soft text-3xl shadow-[var(--shadow-warm-sm)]">
         {emoji}
       </div>
       <h3 className="font-display text-lg text-ink">{title}</h3>

@@ -12,8 +12,9 @@ export function ToysPage() {
     <>
       <PageHeader
         title="我的玩偶"
+        soft
         right={
-          <Link to="/toys/new" className="btn-primary h-9 px-3 text-xs">
+          <Link to="/toys/new" className="btn-primary h-9 px-3.5 text-xs">
             <Plus className="h-4 w-4" />
             新增
           </Link>

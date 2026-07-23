@@ -7,15 +7,24 @@ export function PageHeader({
   subtitle,
   back,
   right,
+  soft,
 }: {
   title: string
   subtitle?: string
   back?: boolean | string
   right?: ReactNode
+  /** mint band background like home header */
+  soft?: boolean
 }) {
   const nav = useNavigate()
   return (
-    <header className="sticky top-0 z-10 flex items-center gap-2 border-b border-line bg-paper px-3 py-3">
+    <header
+      className={`sticky top-0 z-10 flex items-center gap-2 px-3 py-3 ${
+        soft
+          ? 'header-band'
+          : 'bg-paper/95 backdrop-blur-md border-b border-line/60'
+      }`}
+    >
       {back !== undefined && back !== false && (
         <button
           type="button"
@@ -23,7 +32,7 @@ export function PageHeader({
             if (typeof back === 'string') nav(back)
             else nav(-1)
           }}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft active:bg-cream-dark"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-paper text-ink-soft shadow-[var(--shadow-warm-sm)] active:opacity-80"
           aria-label="返回"
         >
           <ChevronLeft className="h-5 w-5" />

@@ -6,6 +6,7 @@ import { EntryDetailPage } from './pages/EntryDetailPage'
 import { GrowthPage } from './pages/GrowthPage'
 import { MePage } from './pages/MePage'
 import { NewToyPage } from './pages/NewToyPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { TimelinePage } from './pages/TimelinePage'
 import { ToysPage } from './pages/ToysPage'
 
@@ -23,6 +24,7 @@ export default function App() {
             <Route path="toys/new" element={<NewToyPage />} />
             <Route path="entries/:id" element={<EntryDetailPage />} />
             <Route path="me" element={<MePage />} />
+            <Route path="me/settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to="/timeline" replace />} />
           </Route>
         </Routes>

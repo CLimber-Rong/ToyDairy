@@ -69,7 +69,7 @@ export function ComposePage() {
   if (!currentToy) {
     return (
       <>
-        <PageHeader title="编辑记录" back="/timeline" />
+        <PageHeader title="编辑记录" back="/timeline" soft />
         <div className="px-4 py-12 text-center text-sm text-ink-muted">
           请先在「玩偶」页创建一只玩偶
         </div>
@@ -79,14 +79,14 @@ export function ComposePage() {
 
   return (
     <>
-      <PageHeader title="编辑记录" back="/timeline" subtitle={currentToy.name} />
+      <PageHeader title="编辑记录" back="/timeline" subtitle={currentToy.name} soft />
       <form onSubmit={onSubmit} className="space-y-5 px-4 py-4">
         <div>
           <span className="mb-1.5 block text-xs font-medium text-ink-soft">
             关联玩偶
           </span>
           <select
-            className="input"
+            className="input !rounded-2xl"
             value={currentToy.id}
             onChange={(e) => setCurrentToyId(e.target.value)}
           >
@@ -122,7 +122,7 @@ export function ComposePage() {
           </span>
           <input
             type="date"
-            className="input"
+            className="input !rounded-2xl"
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
@@ -133,7 +133,7 @@ export function ComposePage() {
             地点
           </span>
           <input
-            className="input"
+            className="input !rounded-2xl"
             placeholder="例如：鼓浪屿"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
@@ -145,7 +145,7 @@ export function ComposePage() {
             标题
           </span>
           <input
-            className="input"
+            className="input !rounded-2xl"
             placeholder="可选"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -157,7 +157,7 @@ export function ComposePage() {
             补充描述
           </span>
           <textarea
-            className="input min-h-[88px] resize-none"
+            className="input min-h-[88px] resize-none !rounded-2xl"
             placeholder="想对玩偶说的话…"
             value={userNote}
             onChange={(e) => setUserNote(e.target.value)}
@@ -187,7 +187,7 @@ export function ComposePage() {
             照片
           </span>
           {imageUrl ? (
-            <div className="relative overflow-hidden rounded-2xl border border-line">
+            <div className="relative overflow-hidden rounded-2xl">
               <img
                 src={imageUrl}
                 alt=""
@@ -202,8 +202,10 @@ export function ComposePage() {
               </button>
             </div>
           ) : (
-            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-line bg-paper py-10 text-ink-muted active:bg-cream">
-              <ImagePlus className="h-7 w-7 text-terra-deep" />
+            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl bg-paper py-10 text-ink-muted shadow-[var(--shadow-warm-sm)] active:opacity-90">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-mustard-soft text-matcha-deep">
+                <ImagePlus className="h-6 w-6" />
+              </span>
               <span className="text-sm">从相册选择</span>
               <input
                 type="file"
