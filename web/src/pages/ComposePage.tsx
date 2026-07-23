@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { ImagePlus, MapPin, X } from 'lucide-react'
+import { ImagePlus, MapPin, ScanText, X } from 'lucide-react'
 import { api } from '../api/client'
 import { PageHeader } from '../components/PageHeader'
 import { useApp } from '../context/AppContext'
@@ -8,6 +8,8 @@ import { useApp } from '../context/AppContext'
 interface ComposeRouteState {
   mode?: 'photo' | 'text'
   imageUrl?: string
+  ocrText?: string
+  fromCamera?: boolean
 }
 
 export function ComposePage() {
@@ -17,7 +19,7 @@ export function ComposePage() {
     useApp()
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [location, setLocation] = useState('')
-  const [userNote, setUserNote] = useState('')
+  const [userNote, setUserNote] = useState(routeState?.ocrText || '')
   const [imageUrl, setImageUrl] = useState<string | undefined>(routeState?.imageUrl)
   const [submitting, setSubmitting] = useState(false)
 
@@ -28,7 +30,8 @@ export function ComposePage() {
   useEffect(() => {
     if (routeState?.imageUrl) setImageUrl(routeState.imageUrl)
     if (routeState?.mode === 'text') setImageUrl(undefined)
-  }, [routeState?.imageUrl, routeState?.mode])
+    if (routeState?.ocrText) setUserNote(routeState.ocrText)
+  }, [routeState?.imageUrl, routeState?.mode, routeState?.ocrText])
 
   function onPickFile(file: File | null) {
     if (!file) return
@@ -36,8 +39,8 @@ export function ComposePage() {
       showToast('请选择图片文件')
       return
     }
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('图片请小于 5MB')
+    if (file.size > 12 * 1024 * 1024) {
+      showToast('图片请小于 12MB')
       return
     }
     setImageUrl(URL.createObjectURL(file))
@@ -71,7 +74,7 @@ export function ComposePage() {
   if (!currentToy) {
     return (
       <>
-        <PageHeader title="编辑记录" back="/timeline" soft />
+        <PageHeader title="编辑记录" back="/archive" soft />
         <div className="px-4 py-12 text-center text-sm text-ink-muted">
           请先在「玩偶」页创建一只玩偶
         </div>
@@ -81,23 +84,33 @@ export function ComposePage() {
 
   return (
     <>
-      <PageHeader title="编辑记录" back="/timeline" soft />
+      <PageHeader title="编辑记录" back="/archive" soft />
       <form onSubmit={onSubmit} className="space-y-5 px-4 py-4">
         {imageUrl && (
-          <div className="relative overflow-hidden rounded-[1.25rem] bg-cream-dark shadow-[var(--shadow-warm-sm)]">
-            <img
-              src={imageUrl}
-              alt="已选照片"
-              className="max-h-64 w-full object-cover"
-            />
-            <button
-              type="button"
-              onClick={() => setImageUrl(undefined)}
-              className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-ink/75 text-white backdrop-blur-sm"
-              aria-label="移除照片"
-            >
-              <X className="h-4 w-4" />
-            </button>
+          <div>
+            <div className="relative overflow-hidden rounded-[1.25rem] bg-cream-dark shadow-[var(--shadow-warm-sm)]">
+              <img
+                src={imageUrl}
+                alt="已选照片"
+                className="max-h-64 w-full object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => setImageUrl(undefined)}
+                className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-ink/75 text-white backdrop-blur-sm"
+                aria-label="移除照片"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            {routeState?.fromCamera && (
+              <div className="mt-2 flex items-center gap-2 rounded-xl bg-mist-soft px-3 py-2 text-[10px] text-matcha-deep">
+                <ScanText className="h-3.5 w-3.5 shrink-0" />
+                {routeState.ocrText
+                  ? '已自动识别照片中的文字，并填入下方描述'
+                  : '照片已拍摄完成，画面中没有识别到清晰文字'}
+              </div>
+            )}
           </div>
         )}
 

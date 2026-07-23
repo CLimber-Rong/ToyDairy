@@ -1,10 +1,17 @@
-import { Outlet } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
 import { BottomNav } from '../components/BottomNav'
 import { Toast } from '../components/Toast'
 import { useApp } from '../context/AppContext'
 
 export function AppLayout() {
   const { loading } = useApp()
+  const { pathname } = useLocation()
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 })
+  }, [pathname])
 
   return (
     <div className="app-shell">
@@ -16,7 +23,7 @@ export function AppLayout() {
           </div>
         ) : (
           <>
-            <div className="page-scroll">
+            <div ref={scrollRef} className="page-scroll">
               <Outlet />
             </div>
             <BottomNav />

@@ -26,7 +26,7 @@ export function EntryDetailPage() {
       } catch {
         if (!cancelled) {
           showToast('记录不存在')
-          nav('/timeline')
+          nav('/archive')
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -55,7 +55,7 @@ export function EntryDetailPage() {
   if (loading || !entry) {
     return (
       <>
-        <PageHeader title="详情" back="/timeline" soft />
+        <PageHeader title="详情" back="/archive" soft />
         <div className="py-16 text-center text-sm text-ink-muted">加载中…</div>
       </>
     )
@@ -65,7 +65,7 @@ export function EntryDetailPage() {
     <>
       <PageHeader
         title={entry.title || '日记详情'}
-        back="/timeline"
+        back="/archive"
         soft
         right={
           <button
