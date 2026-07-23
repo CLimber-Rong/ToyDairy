@@ -1,19 +1,21 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronRight, Info, Settings, Shield } from 'lucide-react'
+import { ChevronRight, Info, Palette, Settings, Shield } from 'lucide-react'
 import { useApp } from '../context/AppContext'
+import { useTheme } from '../theme/ThemeProvider'
 
 const MENU_GRID = [
   { icon: '⭐', label: '我的收藏' },
   { icon: '📋', label: '成长详情' },
   { icon: '🏅', label: '勋章馆' },
-  { icon: '👥', label: '小组件' },
+  { icon: '🎨', label: '切换配色', to: '/me/settings' },
   { icon: '⚙️', label: '设置', to: '/me/settings' },
   { icon: '🔊', label: '声音设置', to: '/me/settings' },
 ] as const
 
 export function MePage() {
   const { toys, entries, currentToy, resetDemo, showToast } = useApp()
+  const { theme } = useTheme()
 
   return (
     <div className="min-h-full">
@@ -27,7 +29,9 @@ export function MePage() {
               <h2 className="truncate font-medium text-ink">演示旅人</h2>
               <span className="text-ink-muted">›</span>
             </div>
-            <p className="mt-0.5 text-xs text-ink-muted">ID: demo@toydairy</p>
+            <p className="mt-0.5 text-xs text-ink-muted">
+              ID: demo@toydairy · {theme.name}
+            </p>
           </div>
           <Link
             to="/me/settings"
@@ -110,6 +114,12 @@ export function MePage() {
         <div className="card-paper overflow-hidden">
           <LinkRow
             to="/me/settings"
+            icon={<Palette className="h-4 w-4" />}
+            label="切换配色"
+            hint={theme.name}
+          />
+          <LinkRow
+            to="/me/settings"
             icon={<Settings className="h-4 w-4" />}
             label="设置"
           />
@@ -178,10 +188,12 @@ function LinkRow({
   to,
   icon,
   label,
+  hint,
 }: {
   to: string
   icon: ReactNode
   label: string
+  hint?: string
 }) {
   return (
     <Link
@@ -190,6 +202,7 @@ function LinkRow({
     >
       <span className="text-matcha-deep">{icon}</span>
       <span className="flex-1 text-sm text-ink">{label}</span>
+      {hint && <span className="text-xs text-ink-muted">{hint}</span>}
       <ChevronRight className="h-4 w-4 text-ink-muted" />
     </Link>
   )

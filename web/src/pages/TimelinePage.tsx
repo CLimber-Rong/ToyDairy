@@ -158,7 +158,7 @@ export function TimelinePage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-[1.25rem] bg-[#ff9e9e] px-4 py-3.5 text-white shadow-[var(--shadow-warm)]">
+        <div className="promo-banner relative overflow-hidden rounded-[1.25rem] px-4 py-3.5 text-white shadow-[var(--shadow-warm)]">
           <div className="relative z-[1] max-w-[70%]">
             <span className="rounded-full bg-white/25 px-2 py-0.5 text-[10px]">
               小贴士

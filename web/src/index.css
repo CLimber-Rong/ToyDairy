@@ -8,7 +8,7 @@
   --font-sans: 'Noto Sans SC', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'ZCOOL XiaoWei', 'Noto Sans SC', serif;
 
-  /* Soft mint-cream world */
+  /* Defaults = 抹茶绿; runtime overrides via data-theme / applyTheme() */
   --color-cream: #f3f8ee;
   --color-cream-dark: #e5efdc;
   --color-almond: #f7faf3;
@@ -18,22 +18,18 @@
   --color-ink-soft: #6b635a;
   --color-ink-muted: #9a9186;
 
-  /* Primary: soft olive / matcha (like 继续新学 button) */
   --color-terra: #c4b08a;
   --color-terra-deep: #b5a06a;
   --color-terra-soft: #f5f0e0;
 
-  /* Warm yellow accent (like member banner) */
   --color-mustard: #f0c96a;
   --color-mustard-soft: #fff6e0;
   --color-honey: #f0c96a;
 
-  /* Soft sky / mint */
   --color-mist: #8fbfa8;
   --color-mist-soft: #e8f5ee;
   --color-sky: #8fbfa8;
 
-  /* Brand greens */
   --color-mint: #cfe8c4;
   --color-mint-deep: #a8d48e;
   --color-matcha: #b5a06a;
@@ -42,12 +38,16 @@
   --color-peach-soft: #fff0eb;
   --color-lavender: #e8e0f5;
 
-  /* Legacy aliases */
   --color-rose: #e8b4a8;
   --color-rose-deep: #d49488;
   --color-sage: #a8d48e;
   --color-coral: #e8b4a8;
   --color-line: #e8e4dc;
+
+  --shell-bg: #e8efe3;
+  --header-from: #d4ecc8;
+  --header-mid: #e8f5dc;
+  --promo-bg: #ff9e9e;
 
   --shadow-warm: 0 4px 16px rgb(74 67 60 / 0.06);
   --shadow-warm-sm: 0 2px 8px rgb(74 67 60 / 0.04);
@@ -77,7 +77,7 @@ body {
   min-height: 100%;
   display: flex;
   justify-content: center;
-  background: #e8efe3;
+  background: var(--shell-bg);
 }
 
 .app-frame {
@@ -155,12 +155,12 @@ body {
 
 .tag-mist {
   background: var(--color-mist-soft);
-  color: #5a8a72;
+  color: var(--color-matcha-deep);
 }
 
 .tag-mustard {
   background: var(--color-mustard-soft);
-  color: #a88430;
+  color: var(--color-ink-soft);
 }
 
 .tag-terra {
@@ -184,7 +184,7 @@ body {
   color: #fff;
   font-weight: 600;
   border: none;
-  box-shadow: 0 4px 12px rgb(181 160 106 / 0.35);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-matcha) 40%, transparent);
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
@@ -204,10 +204,10 @@ body {
   justify-content: center;
   gap: 0.35rem;
   border-radius: 9999px;
-  background: #fdf8ef;
+  background: var(--color-mustard-soft);
   color: var(--color-matcha-deep);
   font-weight: 600;
-  border: 1.5px solid #e8dcc0;
+  border: 1.5px solid var(--color-line);
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
@@ -253,12 +253,17 @@ textarea.input {
 
 .chip-soft-active {
   background: var(--color-mist-soft);
-  color: #5a8a72;
+  color: var(--color-matcha-deep);
 }
 
-/* Soft header band (mint gradient top like ref) */
+/* Soft header band */
 .header-band {
-  background: linear-gradient(180deg, #d4ecc8 0%, #e8f5dc 55%, var(--color-cream) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--header-from) 0%,
+    var(--header-mid) 55%,
+    var(--color-cream) 100%
+  );
   padding-bottom: 0.5rem;
 }
 
@@ -286,11 +291,19 @@ textarea.input {
 .progress-track {
   height: 6px;
   border-radius: 9999px;
-  background: #eee8dc;
+  background: var(--color-line);
   overflow: hidden;
 }
 .progress-fill {
   height: 100%;
   border-radius: 9999px;
-  background: linear-gradient(90deg, #f0c96a, #e8a878);
+  background: linear-gradient(
+    90deg,
+    var(--color-mustard),
+    var(--color-terra)
+  );
+}
+
+.promo-banner {
+  background: var(--promo-bg);
 }
