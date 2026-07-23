@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Git pre-push hook — always runs scripts/pre-push.sh before a push.
+# Installed via: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+SCRIPT="$ROOT/scripts/pre-push.sh"
+
+if [[ ! -x "$SCRIPT" ]]; then
+  if [[ -f "$SCRIPT" ]]; then
+    chmod +x "$SCRIPT"
+  else
+    echo "pre-push: missing $SCRIPT" >&2
+    exit 1
+  fi
+fi
+
+# Forward remote name + URL; stdin (ref lines) is passed through.
+exec "$SCRIPT" "$@"
