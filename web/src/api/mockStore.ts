@@ -1,6 +1,6 @@
 import type { CreateEntryInput, CreateToyInput, Entry, Toy } from '../types'
 
-const STORAGE_KEY = 'toydairy.mock.v1'
+const STORAGE_KEY = 'toydairy.mock.v2'
 
 function uid(prefix: string) {
   return `${prefix}_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36).slice(-4)}`
@@ -68,6 +68,10 @@ interface StoreData {
 function seed(): StoreData {
   const lunaId = 'toy_luna_demo'
   const beanId = 'toy_bean_demo'
+  const mokaId = 'toy_moka_demo'
+  const yukiId = 'toy_yuki_demo'
+  const pipiId = 'toy_pipi_demo'
+
   const toys: Toy[] = [
     {
       id: lunaId,
@@ -87,14 +91,52 @@ function seed(): StoreData {
       birthDate: '2025-12-01',
       birthPlace: '成都宽窄巷子',
       role: '童年伙伴',
-      traits: ['活泼', '话多'],
+      traits: ['活泼', '话多', '爱吃'],
       zodiac: '射手座',
-      bio: '豆豆喜欢热闹，也喜欢在口袋里藏糖纸。',
-      monologue: '今天也要一起出门吗？',
+      bio: '豆豆喜欢热闹，也喜欢在口袋里藏糖纸和辣条包装。',
+      monologue: '今天也要一起出门吗？我已经选好围巾啦！',
       createdAt: '2026-01-10T08:00:00.000Z',
     },
+    {
+      id: mokaId,
+      name: '摩卡',
+      birthDate: '2024-09-15',
+      birthPlace: '京都清水寺',
+      role: '治愈小宠',
+      traits: ['安静', '温柔', '爱睡'],
+      zodiac: '处女座',
+      bio: '一只喜欢咖啡香和旧书味道的小狸，最擅长把人的心事听完。',
+      monologue: '嘘……再陪我坐一会儿就好。',
+      createdAt: '2025-11-02T09:00:00.000Z',
+    },
+    {
+      id: yukiId,
+      name: '雪球 Yuki',
+      birthDate: '2025-01-20',
+      birthPlace: '札幌雪祭',
+      role: '冒险伙伴',
+      traits: ['勇敢', '好奇', '话多'],
+      zodiac: '水瓶座',
+      bio: '圆滚滚的白团子，总想把每一场雪和每一盏灯都装进日记里。',
+      monologue: '冷一点没关系，我们还有彼此的体温！',
+      createdAt: '2025-02-01T11:00:00.000Z',
+    },
+    {
+      id: pipiId,
+      name: '皮皮',
+      birthDate: '2023-06-08',
+      birthPlace: '厦门中山路',
+      role: '旅行搭子',
+      traits: ['活泼', '勇敢', '爱吃'],
+      zodiac: '双子座',
+      bio: '永远第一个冲向小吃摊的小怪物，也是地图上标星星最多的那位。',
+      monologue: '下一站去哪儿？我已经饿了哦。',
+      createdAt: '2024-08-18T07:30:00.000Z',
+    },
   ]
+
   const entries: Entry[] = [
+    // —— Luna ——
     {
       id: 'entry_gulangyu',
       toyId: lunaId,
@@ -107,7 +149,7 @@ function seed(): StoreData {
       imageUrl:
         'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
       aiDiary:
-        '2026年4月3日，鼓浪屿。\n\n今天主人带我来看日落。海风有点大，但我终于知道，太阳回家时，天空会变成橘子汽水的颜色。',
+        '2026年4月3日，鼓浪屿。\n\n今天主人带我来看日落。海风有点大，但我终于知道，太阳回家时，天空会变成橘子汽水的颜色。\n\n我想，以后每次看到这种颜色，都会想起你的手。',
       createdAt: '2026-04-03T18:30:00.000Z',
     },
     {
@@ -120,9 +162,40 @@ function seed(): StoreData {
       userNote: '午睡',
       mood: '温柔',
       aiDiary:
-        '2026年5月12日，家。\n\n窗台有一小块阳光，刚好够我躺下。主人说今天什么也不做，我也跟着什么都不想。',
+        '2026年5月12日，家。\n\n窗台有一小块阳光，刚好够我躺下。主人说今天什么也不做，我也跟着什么都不想。\n\n原来「什么都不做」也是一种很满的一天。',
       createdAt: '2026-05-12T14:00:00.000Z',
     },
+    {
+      id: 'entry_luna_disney',
+      toyId: lunaId,
+      type: 'memorial',
+      date: '2026-07-23',
+      location: '上海迪士尼',
+      title: '我的生日',
+      userNote: '我们第一次相遇',
+      mood: '开心',
+      imageUrl:
+        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80',
+      aiDiary:
+        '2026年7月23日，上海迪士尼。\n\n这是我被写进故事的第一天。烟花很吵，我有点胆小，但主人把我抱得很紧。\n\n我想：原来「家」不是一个地方，是一双愿意带你走的手。',
+      createdAt: '2026-07-23T20:00:00.000Z',
+    },
+    {
+      id: 'entry_luna_hangzhou',
+      toyId: lunaId,
+      type: 'travel',
+      date: '2026-06-08',
+      location: '杭州西湖',
+      title: '伞下的雨',
+      userNote: '细雨断桥',
+      mood: '平静',
+      imageUrl:
+        'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=800&q=80',
+      aiDiary:
+        '2026年6月8日，杭州西湖。\n\n雨点打在伞上像小鼓。我从口袋里探出眼睛，看见湖面被雨敲出很多圆圈。\n\n主人说这叫「断桥残雪」——虽然没有雪，但我决定记住这个湿漉漉的温柔。',
+      createdAt: '2026-06-08T11:20:00.000Z',
+    },
+    // —— 豆豆 ——
     {
       id: 'entry_bean1',
       toyId: beanId,
@@ -131,10 +204,157 @@ function seed(): StoreData {
       location: '大理',
       title: '风很大',
       mood: '兴奋',
-      aiDiary: '2026年3月1日，大理。\n\n风把我的围巾吹成一面小旗。我告诉主人：再大的风也吹不走我们的脚印。',
+      imageUrl:
+        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
+      aiDiary:
+        '2026年3月1日，大理。\n\n风把我的围巾吹成一面小旗。我告诉主人：再大的风也吹不走我们的脚印。\n\n然后我们去吃了烤乳扇，我假装自己也咬了一口。',
       createdAt: '2026-03-01T12:00:00.000Z',
     },
+    {
+      id: 'entry_bean_chengdu',
+      toyId: beanId,
+      type: 'daily',
+      date: '2026-02-14',
+      location: '成都',
+      title: '火锅店门口',
+      userNote: '辣！',
+      mood: '开心',
+      imageUrl:
+        'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&q=80',
+      aiDiary:
+        '2026年2月14日，成都。\n\n火锅的香气从门缝里钻出来，我的绒毛都要变成花椒味了。\n\n主人说「豆豆不能吃辣」——可是看着你们哈哈大笑，我已经吃得很饱了。',
+      createdAt: '2026-02-14T19:40:00.000Z',
+    },
+    {
+      id: 'entry_bean_text',
+      toyId: beanId,
+      type: 'text',
+      date: '2026-04-20',
+      location: '火车上',
+      title: '写给口袋的信',
+      userNote: '晃晃悠悠去下一城',
+      mood: '好奇',
+      aiDiary:
+        '2026年4月20日，火车上。\n\n车窗外的电线杆一棵一棵往后跑。我数到 87 就睡着了。\n\n醒来时主人还在，风景换成了新的——这大概就是旅行最好的部分。',
+      createdAt: '2026-04-20T15:10:00.000Z',
+    },
+    // —— 摩卡 ——
+    {
+      id: 'entry_moka_kyoto',
+      toyId: mokaId,
+      type: 'travel',
+      date: '2025-11-03',
+      location: '京都',
+      title: '红叶与咖啡',
+      userNote: '清水坂',
+      mood: '平静',
+      imageUrl:
+        'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80',
+      aiDiary:
+        '2025年11月3日，京都。\n\n红叶落在我的头顶，像一顶小小的帽子。店员笑着说「かわいい」。\n\n我把那杯拿铁的香气记下来——甜、暖，还有一点点像回家的味道。',
+      createdAt: '2025-11-03T14:00:00.000Z',
+    },
+    {
+      id: 'entry_moka_rain',
+      toyId: mokaId,
+      type: 'daily',
+      date: '2026-01-18',
+      location: '家',
+      title: '听雨的下午',
+      mood: '温柔',
+      aiDiary:
+        '2026年1月18日，家。\n\n雨声把世界关小了一点。主人在写东西，我在毯子上发呆。\n\n有时候治愈不是说话，是两个人都愿意安静。',
+      createdAt: '2026-01-18T16:30:00.000Z',
+    },
+    {
+      id: 'entry_moka_bookstore',
+      toyId: mokaId,
+      type: 'travel',
+      date: '2026-03-22',
+      location: '上海武康路',
+      title: '旧书店',
+      userNote: '翻了很久的诗集',
+      mood: '平静',
+      imageUrl:
+        'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80',
+      aiDiary:
+        '2026年3月22日，上海武康路。\n\n书页的味道比咖啡还让我安心。主人读了一首诗给我听，我一个字都没听懂，但听懂了声音的温度。',
+      createdAt: '2026-03-22T13:15:00.000Z',
+    },
+    // —— 雪球 ——
+    {
+      id: 'entry_yuki_snow',
+      toyId: yukiId,
+      type: 'travel',
+      date: '2025-02-05',
+      location: '札幌',
+      title: '第一次滚雪球',
+      mood: '兴奋',
+      imageUrl:
+        'https://images.unsplash.com/photo-1491002052546-bf38f186af56?w=800&q=80',
+      aiDiary:
+        '2025年2月5日，札幌。\n\n雪地比我还白！主人把我埋进雪里又挖出来，我们笑成一团。\n\n冷是真的，开心也是真的。',
+      createdAt: '2025-02-05T10:00:00.000Z',
+    },
+    {
+      id: 'entry_yuki_night',
+      toyId: yukiId,
+      type: 'travel',
+      date: '2026-01-01',
+      location: '哈尔滨',
+      title: '冰灯之夜',
+      userNote: '跨年',
+      mood: '开心',
+      imageUrl:
+        'https://images.unsplash.com/photo-1483664852095-d6cc467e59f0?w=800&q=80',
+      aiDiary:
+        '2026年1月1日，哈尔滨。\n\n冰灯把夜空染成蓝色和粉色。我对主人说：新年愿望很简单——再带我看一场雪。\n\n主人说好。我记住了。',
+      createdAt: '2026-01-01T23:50:00.000Z',
+    },
+    // —— 皮皮 ——
+    {
+      id: 'entry_pipi_xiamen',
+      toyId: pipiId,
+      type: 'travel',
+      date: '2025-08-20',
+      location: '厦门',
+      title: '海边炸鱿鱼',
+      userNote: '沙很烫',
+      mood: '兴奋',
+      imageUrl:
+        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80&sat=-20',
+      aiDiary:
+        '2025年8月20日，厦门。\n\n沙子烫脚，海风咸咸的，炸鱿鱼的香味从街角拐过来。\n\n主人说「再逛一家」——我已经标记了五家小吃，路线完美。',
+      createdAt: '2025-08-20T17:00:00.000Z',
+    },
+    {
+      id: 'entry_pipi_chongqing',
+      toyId: pipiId,
+      type: 'travel',
+      date: '2026-05-01',
+      location: '重庆',
+      title: '夜景像游戏',
+      mood: '好奇',
+      imageUrl:
+        'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80',
+      aiDiary:
+        '2026年5月1日，重庆。\n\n灯海比游戏里的地图还密。缆车从我们头顶过去，我紧张地抓紧主人的包带。\n\n下山后我们喝了酸梅汤——甜到我忘记害怕。',
+      createdAt: '2026-05-01T21:10:00.000Z',
+    },
+    {
+      id: 'entry_pipi_text',
+      toyId: pipiId,
+      type: 'text',
+      date: '2026-07-01',
+      title: '给未来的自己',
+      userNote: '还要去很多地方',
+      mood: '温柔',
+      aiDiary:
+        '2026年7月1日。\n\n如果以后的皮皮读到这封信：记得继续当第一个冲向小吃摊的那个。\n\n也记得，主人选你，不是因为你会走，是因为你愿意一起走。',
+      createdAt: '2026-07-01T09:00:00.000Z',
+    },
   ]
+
   return { toys, entries, currentToyId: lunaId }
 }
 
