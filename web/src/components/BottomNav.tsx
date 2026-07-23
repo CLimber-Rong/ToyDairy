@@ -14,7 +14,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="absolute bottom-0 inset-x-0 z-20 border-t border-line bg-paper/95 backdrop-blur-md"
+      className="absolute bottom-0 inset-x-0 z-20 border-t border-line bg-paper"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <div className="flex items-end justify-around px-1 h-16">
@@ -27,7 +27,7 @@ export function BottomNav() {
                 className="-mt-5 flex flex-col items-center"
                 aria-label="新增记录"
               >
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-rose-deep text-white shadow-lg shadow-rose/40 active:scale-95 transition-transform">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-terra-deep text-white active:opacity-90">
                   <Plus className="h-7 w-7" strokeWidth={2.5} />
                 </span>
               </Link>
@@ -42,8 +42,8 @@ export function BottomNav() {
             <Link
               key={tab.to}
               to={tab.to}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] transition-colors ${
-                active ? 'text-rose-deep font-medium' : 'text-ink-muted'
+              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] ${
+                active ? 'text-terra-deep font-medium' : 'text-ink-muted'
               }`}
             >
               <Icon className="h-5 w-5" strokeWidth={active ? 2.25 : 1.75} />

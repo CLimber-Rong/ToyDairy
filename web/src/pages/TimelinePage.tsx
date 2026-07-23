@@ -15,10 +15,7 @@ export function TimelinePage() {
           title="还没有玩偶"
           desc="先创建一只玩偶，再开始记录吧。"
           action={
-            <Link
-              to="/toys/new"
-              className="rounded-full bg-rose-deep px-5 py-2.5 text-sm text-white"
-            >
+            <Link to="/toys/new" className="btn-primary px-6 py-2.5 text-sm">
               新建玩偶
             </Link>
           }
@@ -29,21 +26,25 @@ export function TimelinePage() {
 
   return (
     <>
-      <PageHeader
-        title="旅行日志"
-        subtitle={`当前：${currentToy.name}`}
-      />
+      <PageHeader title="旅行日志" subtitle={`当前：${currentToy.name}`} />
       <div className="space-y-3 px-4 py-4">
+        <div className="card-hero flex items-center justify-between px-4 py-3.5">
+          <div>
+            <p className="text-xs text-ink-muted">手帐记录</p>
+            <p className="font-display mt-0.5 text-lg text-ink">
+              {entries.length} 段记忆
+            </p>
+          </div>
+          <span className="tag tag-cream">{currentToy.name}</span>
+        </div>
+
         {entries.length === 0 ? (
           <EmptyState
             emoji="📔"
             title="还没有记录"
             desc="点中间的 + 写一条旅行或日常日记。"
             action={
-              <Link
-                to="/compose"
-                className="rounded-full bg-rose-deep px-5 py-2.5 text-sm text-white"
-              >
+              <Link to="/compose" className="btn-primary px-6 py-2.5 text-sm">
                 写一条
               </Link>
             }

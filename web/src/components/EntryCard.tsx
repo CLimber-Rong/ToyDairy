@@ -7,10 +7,10 @@ export function EntryCard({ entry }: { entry: Entry }) {
   return (
     <Link
       to={`/entries/${entry.id}`}
-      className="card-paper block overflow-hidden rounded-2xl active:scale-[0.99] transition-transform"
+      className="block overflow-hidden rounded-2xl border border-line bg-paper active:opacity-90"
     >
       {entry.imageUrl && (
-        <div className="aspect-[16/10] overflow-hidden bg-cream-dark">
+        <div className="aspect-[16/10] bg-cream-dark">
           <img
             src={entry.imageUrl}
             alt=""
@@ -20,12 +20,10 @@ export function EntryCard({ entry }: { entry: Entry }) {
       )}
       <div className="p-3.5">
         <div className="flex items-center justify-between gap-2">
-          <span className="rounded-full bg-cream-dark px-2 py-0.5 text-[11px] text-ink-soft">
-            {ENTRY_TYPE_LABEL[entry.type]}
-          </span>
+          <span className="tag tag-mist">{ENTRY_TYPE_LABEL[entry.type]}</span>
           <time className="text-xs text-ink-muted">{entry.date}</time>
         </div>
-        <h3 className="mt-1.5 font-medium text-ink line-clamp-1">
+        <h3 className="mt-2 font-medium text-ink line-clamp-1">
           {entry.title || entry.location || '无题记录'}
         </h3>
         {entry.location && (

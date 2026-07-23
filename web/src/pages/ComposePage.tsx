@@ -36,8 +36,7 @@ export function ComposePage() {
       showToast('图片请小于 5MB')
       return
     }
-    const url = URL.createObjectURL(file)
-    setImageUrl(url)
+    setImageUrl(URL.createObjectURL(file))
   }
 
   async function onSubmit(e: FormEvent) {
@@ -109,11 +108,7 @@ export function ComposePage() {
                 key={t}
                 type="button"
                 onClick={() => setType(t)}
-                className={`rounded-full px-3 py-1.5 text-sm ${
-                  type === t
-                    ? 'bg-rose-deep text-white'
-                    : 'bg-cream-dark text-ink-soft'
-                }`}
+                className={type === t ? 'chip chip-active' : 'chip'}
               >
                 {ENTRY_TYPE_LABEL[t]}
               </button>
@@ -179,11 +174,7 @@ export function ComposePage() {
                 key={m}
                 type="button"
                 onClick={() => setMood(mood === m ? '' : m)}
-                className={`rounded-full px-3 py-1.5 text-sm ${
-                  mood === m
-                    ? 'bg-honey/60 text-ink'
-                    : 'bg-cream-dark text-ink-soft'
-                }`}
+                className={mood === m ? 'chip chip-soft-active' : 'chip'}
               >
                 {m}
               </button>
@@ -193,22 +184,26 @@ export function ComposePage() {
 
         <div>
           <span className="mb-1.5 block text-xs font-medium text-ink-soft">
-            照片（Mock 本地预览）
+            照片
           </span>
           {imageUrl ? (
-            <div className="relative overflow-hidden rounded-2xl">
-              <img src={imageUrl} alt="" className="max-h-48 w-full object-cover" />
+            <div className="relative overflow-hidden rounded-2xl border border-line">
+              <img
+                src={imageUrl}
+                alt=""
+                className="max-h-48 w-full object-cover"
+              />
               <button
                 type="button"
                 onClick={() => setImageUrl(undefined)}
-                className="absolute right-2 top-2 rounded-full bg-ink/70 p-1.5 text-white"
+                className="absolute right-2 top-2 rounded-full bg-ink/80 p-1.5 text-white"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
           ) : (
-            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-line bg-paper py-10 text-ink-muted active:bg-cream-dark">
-              <ImagePlus className="h-8 w-8 text-rose" />
+            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-line bg-paper py-10 text-ink-muted active:bg-cream">
+              <ImagePlus className="h-7 w-7 text-terra-deep" />
               <span className="text-sm">从相册选择</span>
               <input
                 type="file"
@@ -223,27 +218,11 @@ export function ComposePage() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-2xl bg-rose-deep py-3.5 text-sm font-medium text-white shadow-md shadow-rose/30 disabled:opacity-60"
+          className="btn-primary w-full py-3.5 text-sm"
         >
           {submitting ? 'AI 写日记中…' : '保存并生成日记'}
         </button>
       </form>
-      <style>{`
-        .input {
-          width: 100%;
-          border-radius: 0.75rem;
-          border: 1px solid var(--color-line);
-          background: var(--color-paper);
-          padding: 0.75rem 0.875rem;
-          font-size: 0.875rem;
-          color: var(--color-ink);
-          outline: none;
-        }
-        .input:focus {
-          border-color: var(--color-rose);
-          box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-rose) 25%, transparent);
-        }
-      `}</style>
     </>
   )
 }

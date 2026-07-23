@@ -28,10 +28,10 @@ export function GrowthPage() {
         title="成长档案"
         subtitle={currentToy ? currentToy.name : '占位页'}
       />
-      <div className="space-y-4 px-4 py-4">
+      <div className="space-y-3 px-4 py-4">
         <div className="card-paper rounded-2xl p-4">
-          <p className="text-xs text-ink-muted">本轮 MVP 占位 · 后续接地图</p>
-          <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+          <p className="text-xs text-ink-muted">MVP 占位 · 后续接地图</p>
+          <div className="mt-3 grid grid-cols-3 gap-2 text-center">
             <Stat label="陪伴天数" value={String(days)} />
             <Stat label="记录数" value={String(entries.length)} />
             <Stat label="到访地点" value={String(cities.length)} />
@@ -40,7 +40,7 @@ export function GrowthPage() {
 
         <div className="card-paper rounded-2xl p-4">
           <h3 className="flex items-center gap-2 font-medium text-ink">
-            <MapPinned className="h-4 w-4 text-rose" />
+            <MapPinned className="h-4 w-4 text-ink-muted" />
             城市列表
           </h3>
           {cities.length === 0 ? (
@@ -48,10 +48,7 @@ export function GrowthPage() {
           ) : (
             <ul className="mt-3 flex flex-wrap gap-2">
               {cities.map((c) => (
-                <li
-                  key={c}
-                  className="rounded-full bg-sky/25 px-3 py-1 text-sm text-ink-soft"
-                >
+                <li key={c} className="tag tag-mist text-sm !px-3 !py-1">
                   {c}
                 </li>
               ))}
@@ -67,7 +64,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl bg-cream px-2 py-3">
       <div className="font-display text-2xl text-ink">{value}</div>
-      <div className="mt-1 text-[11px] text-ink-muted">{label}</div>
+      <div className="mt-0.5 text-[11px] text-ink-muted">{label}</div>
     </div>
   )
 }

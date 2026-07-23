@@ -15,7 +15,7 @@ export function PageHeader({
 }) {
   const nav = useNavigate()
   return (
-    <header className="sticky top-0 z-10 flex items-center gap-2 border-b border-line/80 bg-cream/90 px-3 py-3 backdrop-blur-md">
+    <header className="sticky top-0 z-10 flex items-center gap-2 border-b border-line bg-paper px-3 py-3">
       {back !== undefined && back !== false && (
         <button
           type="button"

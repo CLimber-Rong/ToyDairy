@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { PageHeader } from '../components/PageHeader'
@@ -56,6 +56,10 @@ export function NewToyPage() {
     <>
       <PageHeader title="新建玩偶" back />
       <form onSubmit={onSubmit} className="space-y-5 px-4 py-4">
+        <p className="rounded-2xl bg-terra-soft px-4 py-3 text-sm text-ink-soft">
+          填写基本信息后生成身份卡（星座 · 简介 · 独白）。
+        </p>
+
         <Field label="玩偶名称">
           <input
             className="input"
@@ -89,11 +93,7 @@ export function NewToyPage() {
                 key={r}
                 type="button"
                 onClick={() => setRole(r)}
-                className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
-                  role === r
-                    ? 'bg-rose-deep text-white'
-                    : 'bg-cream-dark text-ink-soft'
-                }`}
+                className={role === r ? 'chip chip-active' : 'chip'}
               >
                 {r}
               </button>
@@ -109,9 +109,7 @@ export function NewToyPage() {
                   key={t}
                   type="button"
                   onClick={() => toggleTrait(t)}
-                  className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
-                    on ? 'bg-sky/50 text-ink' : 'bg-cream-dark text-ink-soft'
-                  }`}
+                  className={on ? 'chip chip-soft-active' : 'chip'}
                 >
                   {t}
                 </button>
@@ -120,50 +118,28 @@ export function NewToyPage() {
           </div>
         </Field>
 
-        <p className="text-xs leading-relaxed text-ink-muted">
-          保存后会由 Mock AI 自动补全星座、简介与独白（对接后端后走
-          <code className="mx-1 rounded bg-cream-dark px-1">POST /toys</code>
-          与 generate-profile）。
+        <p className="text-xs text-ink-muted">
+          Mock AI 补全 · 后端就绪后走 POST /toys
         </p>
 
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-2xl bg-rose-deep py-3.5 text-sm font-medium text-white shadow-md shadow-rose/30 disabled:opacity-60"
+          className="btn-primary w-full py-3.5 text-sm"
         >
           {submitting ? '生成身份卡中…' : '创建并生成身份卡'}
         </button>
       </form>
-      <style>{`
-        .input {
-          width: 100%;
-          border-radius: 0.75rem;
-          border: 1px solid var(--color-line);
-          background: var(--color-paper);
-          padding: 0.75rem 0.875rem;
-          font-size: 0.875rem;
-          color: var(--color-ink);
-          outline: none;
-        }
-        .input:focus {
-          border-color: var(--color-rose);
-          box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-rose) 25%, transparent);
-        }
-      `}</style>
     </>
   )
 }
 
-function Field({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-xs font-medium text-ink-soft">{label}</span>
+      <span className="mb-1.5 block text-xs font-medium text-ink-soft">
+        {label}
+      </span>
       {children}
     </label>
   )
