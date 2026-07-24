@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { MapPin, RefreshCw } from 'lucide-react'
 import { api } from '../api/client'
+import { LoadingBear } from '../components/LoadingBear'
 import { PageHeader } from '../components/PageHeader'
 import { useApp } from '../context/AppContext'
 import type { Entry } from '../types'
@@ -56,8 +57,10 @@ export function EntryDetailPage() {
     return (
       <>
         <PageHeader title="详情" back="/archive" soft />
-        <div className="flex flex-col items-center gap-3 py-20 text-center text-sm text-ink-muted">
-          <div className="loading-pulse text-3xl">📔</div>
+        <div className="loading-inline">
+          <div className="loading-bear-wrap">
+            <LoadingBear className="loading-bear h-16 w-16" />
+          </div>
           <p>加载中…</p>
         </div>
       </>
