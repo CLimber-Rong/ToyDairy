@@ -28,7 +28,12 @@ export function MemoryHallPage() {
   const [playing, setPlaying] = useState(true)
   const [musicOn, setMusicOn] = useState(true)
   const [shareOpen, setShareOpen] = useState(false)
-  const photos = useMemo(() => archivePhotos(entries), [entries])
+  // Wait until currentToy matches route id so we don't flash another toy's photos.
+  const ready = Boolean(toy && currentToy?.id === toy.id)
+  const photos = useMemo(
+    () => (ready ? archivePhotos(entries) : []),
+    [entries, ready],
+  )
 
   useEffect(() => {
     if (toy && currentToy?.id !== toy.id) setCurrentToyId(toy.id)

@@ -23,28 +23,27 @@ export function BottomNav() {
 
   return (
     <nav
-      className="bottom-nav z-20 bg-paper"
+      className="bottom-nav z-20"
       style={{
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-        boxShadow: '0 -4px 20px rgb(74 67 60 / 0.06)',
       }}
     >
-      <div className="relative flex items-end justify-around px-1 h-16">
+      <div className="relative flex h-[4.5rem] items-end justify-around px-1">
         {tabs.map((tab) => {
-          if (!('to' in tab)) {
-            return <span key="nav-spacer" className="flex-1" aria-hidden="true" />
-          }
           if ('center' in tab && tab.center) {
             return (
               <button
                 key={tab.to}
                 type="button"
                 onClick={() => setComposerOpen(true)}
-                className="-mt-5 flex flex-col items-center"
+                className="fab-float -mt-7 flex flex-col items-center"
                 aria-label="新增记录"
               >
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-matcha text-white shadow-[0_6px_16px_rgb(181_160_106_/_0.45)] active:scale-95 transition-transform">
+                <span className="relative flex h-[3.75rem] w-[3.75rem] items-center justify-center rounded-full bg-gradient-to-b from-[color-mix(in_srgb,var(--color-matcha)_90%,white)] to-[var(--color-matcha-deep)] text-white shadow-[var(--shadow-glow)] ring-[3px] ring-paper transition-transform active:scale-95">
                   <Plus className="h-7 w-7" strokeWidth={2.5} />
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-peach text-[9px] shadow-sm ring-2 ring-paper">
+                    ✨
+                  </span>
                 </span>
               </button>
             )
@@ -63,12 +62,22 @@ export function BottomNav() {
             <Link
               key={tab.to}
               to={tab.to}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] transition-colors ${
-                active ? 'text-matcha-deep font-semibold' : 'text-ink-muted'
+              className={`relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] transition-all duration-200 ${
+                active ? 'font-semibold text-matcha-deep' : 'text-ink-muted'
               }`}
             >
-              <TabIcon className="h-7 w-7" />
-              <span>{tab.label}</span>
+              {active && (
+                <span className="absolute -top-0.5 left-1/2 h-11 w-11 -translate-x-1/2 rounded-2xl bg-mustard-soft/90 shadow-[inset_0_1px_0_rgb(255_255_255_/_0.6)]" />
+              )}
+              <TabIcon
+                className={`relative h-7 w-7 transition-transform duration-200 ${
+                  active ? 'scale-110' : ''
+                }`}
+              />
+              <span className="relative tracking-wide">{tab.label}</span>
+              {active && (
+                <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-matcha" />
+              )}
             </Link>
           )
         })}

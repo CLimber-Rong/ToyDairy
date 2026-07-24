@@ -243,7 +243,7 @@ export function CommunityToyPage() {
         {tab === 'posts' && (
           <PostGrid
             posts={posts}
-            fallback={communityPosts.filter((p) => p.imageUrl).slice(0, 3)}
+            fallback={[]}
             commentCount={postCommentCount}
           />
         )}

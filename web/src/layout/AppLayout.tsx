@@ -17,9 +17,14 @@ export function AppLayout() {
     <div className="app-shell">
       <div className="app-frame">
         {loading ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-ink-muted">
-            <div className="h-8 w-8 animate-pulse rounded-full bg-matcha/30" />
-            <p className="text-sm">加载中…</p>
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 text-ink-muted">
+            <div className="loading-pulse flex h-16 w-16 items-center justify-center rounded-[1.25rem] bg-mustard-soft text-4xl shadow-[var(--shadow-warm)]">
+              🧸
+            </div>
+            <div className="text-center">
+              <p className="font-display text-base text-ink">Toy Dairy</p>
+              <p className="mt-1 text-sm text-ink-muted">正在打开手帐…</p>
+            </div>
           </div>
         ) : (
           <>

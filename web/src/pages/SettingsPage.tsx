@@ -41,17 +41,17 @@ export function SettingsPage() {
                   key={t.id}
                   type="button"
                   onClick={() => onPickTheme(t.id)}
-                  className={`flex items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors ${
+                  className={`flex items-center gap-3 rounded-2xl px-3 py-3 text-left transition-all duration-200 ${
                     active
-                      ? 'bg-mist-soft ring-2 ring-matcha'
-                      : 'bg-cream active:bg-cream-dark'
+                      ? 'bg-mist-soft shadow-[var(--shadow-warm-sm)] ring-2 ring-matcha'
+                      : 'bg-cream/80 ring-1 ring-line/40 active:bg-cream-dark'
                   }`}
                 >
-                  <span className="flex shrink-0 gap-0.5">
+                  <span className="flex shrink-0 overflow-hidden rounded-xl shadow-sm ring-1 ring-black/5">
                     {t.swatches.map((c) => (
                       <span
                         key={c}
-                        className="h-8 w-5 first:rounded-l-lg last:rounded-r-lg"
+                        className="h-9 w-5 first:rounded-l-xl last:rounded-r-xl"
                         style={{ background: c }}
                       />
                     ))}

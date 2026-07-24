@@ -75,7 +75,7 @@ export function ComposePage() {
     return (
       <>
         <PageHeader title="编辑记录" back="/archive" soft />
-        <div className="px-4 py-12 text-center text-sm text-ink-muted">
+        <div className="px-4 py-16 text-center text-sm text-ink-muted">
           请先在「玩偶」页创建一只玩偶
         </div>
       </>
@@ -87,8 +87,8 @@ export function ComposePage() {
       <PageHeader title="编辑记录" back="/archive" soft />
       <form onSubmit={onSubmit} className="space-y-5 px-4 py-4">
         {imageUrl && (
-          <div>
-            <div className="relative overflow-hidden rounded-[1.25rem] bg-cream-dark shadow-[var(--shadow-warm-sm)]">
+          <div className="card-paper overflow-hidden p-0">
+            <div className="relative overflow-hidden bg-cream-dark">
               <img
                 src={imageUrl}
                 alt="已选照片"
@@ -97,14 +97,14 @@ export function ComposePage() {
               <button
                 type="button"
                 onClick={() => setImageUrl(undefined)}
-                className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-ink/75 text-white backdrop-blur-sm"
+                className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-ink/75 text-white shadow-md backdrop-blur-sm transition-transform active:scale-95"
                 aria-label="移除照片"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
             {routeState?.fromCamera && (
-              <div className="mt-2 flex items-center gap-2 rounded-xl bg-mist-soft px-3 py-2 text-[10px] text-matcha-deep">
+              <div className="flex items-center gap-2 bg-mist-soft/80 px-3.5 py-2.5 text-[10px] text-matcha-deep">
                 <ScanText className="h-3.5 w-3.5 shrink-0" />
                 {routeState.ocrText
                   ? '已自动识别照片中的文字，并填入下方描述'
@@ -114,72 +114,75 @@ export function ComposePage() {
           </div>
         )}
 
-        <div>
-          <span className="mb-1.5 block text-xs font-medium text-ink-soft">
-            关联玩偶
-          </span>
-          <select
-            className="input !rounded-2xl"
-            value={currentToy.id}
-            onChange={(e) => setCurrentToyId(e.target.value)}
-          >
-            {toys.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-medium text-ink-soft">
-            日期
-          </span>
-          <input
-            type="date"
-            className="input !rounded-2xl"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-        </label>
-
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-medium text-ink-soft">
-            地点
-          </span>
-          <div className="relative">
-            <MapPin className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
-            <input
-              className="input !rounded-2xl !pl-10"
-              placeholder="例如：鼓浪屿"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
-          </div>
-        </label>
-
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-medium text-ink-soft">
-            描述
-          </span>
-          <textarea
-            className="input min-h-[120px] resize-none !rounded-2xl"
-            placeholder="想对玩偶说的话…"
-            value={userNote}
-            onChange={(e) => setUserNote(e.target.value)}
-          />
-        </label>
-
-        {!imageUrl && routeState?.mode !== 'text' && (
+        <div className="card-paper space-y-5 p-4">
           <div>
             <span className="mb-1.5 block text-xs font-medium text-ink-soft">
+              关联玩偶
+            </span>
+            <select
+              className="input !rounded-2xl"
+              value={currentToy.id}
+              onChange={(e) => setCurrentToyId(e.target.value)}
+            >
+              {toys.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-medium text-ink-soft">
+              日期
+            </span>
+            <input
+              type="date"
+              className="input !rounded-2xl"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-medium text-ink-soft">
+              地点
+            </span>
+            <div className="relative">
+              <MapPin className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+              <input
+                className="input !rounded-2xl !pl-10"
+                placeholder="例如：鼓浪屿"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </div>
+          </label>
+
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-medium text-ink-soft">
+              描述
+            </span>
+            <textarea
+              className="input min-h-[120px] resize-none !rounded-2xl"
+              placeholder="想对玩偶说的话…"
+              value={userNote}
+              onChange={(e) => setUserNote(e.target.value)}
+            />
+          </label>
+        </div>
+
+        {!imageUrl && routeState?.mode !== 'text' && (
+          <div className="card-paper p-4">
+            <span className="mb-2.5 block text-xs font-medium text-ink-soft">
               照片
             </span>
-            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl bg-paper py-10 text-ink-muted shadow-[var(--shadow-warm-sm)] active:opacity-90">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-mustard-soft text-matcha-deep">
+            <label className="flex cursor-pointer flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-dashed border-line/80 bg-cream/50 py-12 text-ink-muted transition-colors active:bg-cream">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-mustard-soft to-peach-soft text-matcha-deep shadow-[var(--shadow-warm-sm)]">
                 <ImagePlus className="h-6 w-6" />
               </span>
-              <span className="text-sm">从相册选择</span>
+              <span className="text-sm font-medium">从相册选择</span>
+              <span className="text-[11px] text-ink-muted">支持 JPG / PNG</span>
               <input
                 type="file"
                 accept="image/*"
