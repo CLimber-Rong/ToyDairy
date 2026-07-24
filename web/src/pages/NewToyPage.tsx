@@ -56,10 +56,9 @@ export function NewToyPage() {
     <>
       <PageHeader title="新建玩偶" back soft />
       <form onSubmit={onSubmit} className="space-y-5 px-4 py-4">
-        <div className="card-paper flex items-center gap-3 p-3.5">
-          <span className="text-3xl">🐻</span>
+        <div className="card-paper p-3.5">
           <p className="text-sm leading-relaxed text-ink-soft">
-            填写基本信息后，会生成可爱的身份卡（星座 · 简介 · 独白）。
+            填写基本信息后，会生成身份卡（星座 · 简介 · 独白）。
           </p>
         </div>
 

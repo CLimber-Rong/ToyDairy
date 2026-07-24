@@ -1,0 +1,55 @@
+import type { Entry, Toy } from '../types'
+
+const FALLBACK_PHOTOS = [
+  '/toy-cards/highlight-1.jpg',
+  '/toy-cards/highlight-2.jpg',
+  '/toy-cards/highlight-3.jpg',
+] as const
+
+export function companionDays(toy: Toy) {
+  if (toy.id === 'toy_luna_demo') return 100
+  const start = new Date(`${toy.birthDate}T00:00:00`).getTime()
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return Math.max(1, Math.floor((today.getTime() - start) / 86400000) + 1)
+}
+
+export function toyAvatar(toy: Toy | null | undefined, index = 0) {
+  if (toy?.avatarUrl) return toy.avatarUrl
+  if (toy?.id === 'toy_luna_demo' || index <= 0) return '/toy-cards/profile.jpg'
+  if (toy?.id === 'toy_bean_demo' || index === 1) {
+    return '/toy-cards/highlight-3.jpg'
+  }
+  return index % 2 === 0
+    ? '/toy-cards/highlight-2.jpg'
+    : '/toy-cards/highlight-1.jpg'
+}
+
+export function archivePhotos(entries: Entry[]) {
+  const photos = entries
+    .filter((entry) => Boolean(entry.imageUrl))
+    .map((entry) => ({
+      src: entry.imageUrl as string,
+      title: entry.title || '一起收藏的日子',
+      narration:
+        entry.userNote ||
+        entry.aiDiary?.split('\n').find((line) => line.trim()) ||
+        '这一天的光，我替你记住了。',
+      date: entry.date,
+      location: entry.location || '我们的秘密地点',
+    }))
+
+  if (photos.length > 0) return photos
+
+  return FALLBACK_PHOTOS.map((src, index) => ({
+    src,
+    title: ['海风吹过的下午', '把浪花装进口袋', '藏在绿意里的瀑布'][index],
+    narration: [
+      '第一次一起出发，蓝色的海很大，但你的手心刚刚好。',
+      '我们把阳光、浪花和想念，都收藏在了这张照片里。',
+      '水声很响，可是被你拿在手里时，我一点也不害怕。',
+    ][index],
+    date: ['2026-07-23', '2026-06-08', '2026-04-03'][index],
+    location: ['蓝色海湾', '阳光海岸', '森林瀑布'][index],
+  }))
+}

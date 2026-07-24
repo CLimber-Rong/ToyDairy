@@ -1,218 +1,254 @@
-import { Link } from 'react-router-dom'
+import { useState, type KeyboardEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
-  BookOpen,
+  Bell,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  MapPin,
+  MessageCircle,
   PenLine,
+  Sparkles,
 } from 'lucide-react'
-import { EntryCard } from '../components/EntryCard'
-import { EmptyState } from '../components/EmptyState'
+import { companionDays, toyAvatar } from '../archive/archiveUtils'
+import { RecordMethodSheet } from '../components/RecordMethodSheet'
 import { useApp } from '../context/AppContext'
 
-const SHORTCUTS = [
-  { to: '/compose', label: '写日记', emoji: '✏️', bg: 'bg-[#fff0e8]' },
-  { to: '/toys/new', label: '新玩偶', emoji: '🧸', bg: 'bg-[#e8f5ee]' },
-  { to: '/growth', label: '成长档', emoji: '🌱', bg: 'bg-[#eef6e4]' },
-  { to: '/toys', label: '身份卡', emoji: '🪪', bg: 'bg-[#fff6e0]' },
-  { to: '/me', label: '我的', emoji: '🐹', bg: 'bg-[#f0eef8]' },
-  { to: '/compose', label: '传照片', emoji: '📷', bg: 'bg-[#e8f0fa]' },
-  { to: '/timeline', label: '时间轴', emoji: '🗓️', bg: 'bg-[#fdf0f0]' },
-  { to: '/growth', label: '城市', emoji: '🗺️', bg: 'bg-[#e8f8f4]' },
-] as const
-
 export function TimelinePage() {
-  const { currentToy, entries, toys } = useApp()
+  const navigate = useNavigate()
+  const {
+    currentToy,
+    toys,
+    setCurrentToyId,
+    showToast,
+  } = useApp()
+  const [toyPickerOpen, setToyPickerOpen] = useState(false)
+  const [recordSheetOpen, setRecordSheetOpen] = useState(false)
+  const days = currentToy ? companionDays(currentToy) : 0
+  const milestone = getMilestone(days)
+  const currentToyIndex = toys.findIndex((toy) => toy.id === currentToy?.id)
+  const avatar = toyAvatar(currentToy, currentToyIndex)
 
-  const totalEntries = entries.length
-  const withPhoto = entries.filter((e) => e.imageUrl).length
-  const progress =
-    totalEntries === 0
-      ? 12
-      : Math.min(100, Math.round((withPhoto / Math.max(totalEntries, 1)) * 100) || 30)
+  function openToyDetail() {
+    if (currentToy) navigate(`/archive/toys/${currentToy.id}`)
+  }
+
+  function onToyCardKeyDown(e: KeyboardEvent<HTMLElement>) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      openToyDetail()
+    }
+  }
 
   return (
     <div className="min-h-full">
-      <div className="header-band pattern-soft px-4 pb-3 pt-3">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🧸</span>
-            <span className="font-display text-xl tracking-wide text-ink">
-              Toy Dairy
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-paper/90 text-lg shadow-[var(--shadow-warm-sm)]">
-              📅
-            </span>
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-paper/90 text-lg shadow-[var(--shadow-warm-sm)]">
-              🔔
-            </span>
-          </div>
-        </div>
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line/60 bg-white/95 px-4 py-3 backdrop-blur-md">
+        <h1 className="font-display text-xl tracking-wide text-ink">Toy Dairy</h1>
+        <button
+          type="button"
+          onClick={() => showToast('暂时没有新的玩偶消息')}
+          className="relative flex h-9 w-9 items-center justify-center rounded-full bg-mustard-soft text-matcha-deep shadow-[var(--shadow-warm-sm)] active:scale-95"
+          aria-label="消息"
+        >
+          <MessageCircle className="h-5 w-5 fill-white/70" />
+          <span className="absolute right-0.5 top-0.5 h-2 w-2 rounded-full border-2 border-white bg-rose" />
+        </button>
+      </header>
 
-        <div className="mb-2 flex justify-end gap-1 pr-2 text-2xl opacity-90">
-          <span>🐹</span>
-          <span>🐻</span>
-          <span className="text-mustard">✦</span>
-        </div>
-
-        <div className="card-paper relative overflow-hidden p-3.5">
-          {currentToy ? (
-            <div className="flex gap-3">
-              <div className="flex h-[4.75rem] w-[3.75rem] shrink-0 flex-col items-center justify-center rounded-xl bg-mint/60 text-2xl">
-                🧸
-                <span className="mt-1 rounded-full bg-matcha px-1.5 py-0.5 text-[9px] font-medium text-white">
-                  当前
-                </span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h2 className="truncate font-medium text-ink">
-                      {currentToy.name}
-                    </h2>
-                    <p className="mt-0.5 text-xs text-ink-muted">
-                      {currentToy.role} · {currentToy.birthPlace}
-                    </p>
-                  </div>
-                  <Link to="/toys" className="shrink-0 text-xs text-matcha-deep">
-                    切换 ›
-                  </Link>
+      <main className="space-y-4 px-4 pb-5 pt-4">
+        {currentToy ? (
+          <section className="relative">
+            <article
+              role="button"
+              tabIndex={0}
+              onClick={openToyDetail}
+              onKeyDown={onToyCardKeyDown}
+              className="archive-toy-card cursor-pointer active:scale-[0.99] transition-transform"
+              aria-label={`查看 ${currentToy.name} 的玩偶档案`}
+            >
+              <div className="archive-toy-card__accent" />
+              <div className="relative flex gap-3.5 p-4">
+                <div className="h-[5.6rem] w-[5.6rem] shrink-0 overflow-hidden rounded-[1.25rem] border-2 border-white bg-cream shadow-md">
+                  <img
+                    src={avatar}
+                    alt={currentToy.name}
+                    className="h-full w-full object-cover"
+                  />
                 </div>
-                <div className="mt-2.5">
-                  <div className="progress-track">
-                    <div
-                      className="progress-fill"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <div className="mt-1.5 flex items-center justify-between text-[11px] text-ink-muted">
-                    <span>
-                      {totalEntries} 条记录 · {withPhoto} 张照片
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-medium tracking-wider text-matcha-deep">
+                        CURRENT TOY
+                      </p>
+                      <h2 className="mt-0.5 truncate font-display text-xl text-ink">
+                        {currentToy.name}
+                      </h2>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-white/80 px-2 py-1 text-[10px] text-ink-muted">
+                      陪伴 {days} 天
                     </span>
-                    <span>{toys.length} 只玩偶</span>
                   </div>
+                  <p className="mt-1.5 flex items-center gap-1 text-[11px] text-ink-muted">
+                    <MapPin className="h-3.5 w-3.5 text-matcha-deep" />
+                    出生于 {currentToy.birthPlace}
+                  </p>
+                  <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-ink-soft">
+                    “{currentToy.monologue || '今天也想和你一起收藏生活。'}”
+                  </p>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between gap-3 py-1">
-              <p className="text-sm text-ink-soft">还没有玩偶哦</p>
-              <Link to="/toys/new" className="btn-primary px-4 py-2 text-xs">
-                去创建
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
 
-      <div className="space-y-4 px-4 pb-4 pt-1">
-        <div className="card-paper px-4 py-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-medium text-ink">今日手帐</h3>
-            <Link to="/compose" className="text-ink-muted">
-              <PenLine className="h-4 w-4" />
-            </Link>
-          </div>
-          <div className="mb-4 flex justify-around text-center">
-            <div>
-              <p className="font-display text-2xl text-matcha-deep">
-                {totalEntries}
-                <span className="text-sm text-ink-muted"> 条</span>
-              </p>
-              <p className="mt-0.5 text-xs text-ink-muted">全部日记</p>
-            </div>
-            <div className="w-px bg-line" />
-            <div>
-              <p className="font-display text-2xl text-ink">
-                {withPhoto}
-                <span className="text-sm text-ink-muted"> 张</span>
-              </p>
-              <p className="mt-0.5 text-xs text-ink-muted">带图记录</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2.5">
-            <Link to="/compose" className="btn-primary py-3 text-sm">
-              继续记录
-            </Link>
-            <Link to="/toys" className="btn-secondary py-3 text-sm">
-              看身份卡
-            </Link>
-          </div>
-        </div>
-
-        <div className="card-paper px-3 py-4">
-          <div className="grid grid-cols-4 gap-y-4">
-            {SHORTCUTS.map((s) => (
-              <Link
-                key={s.label}
-                to={s.to}
-                className="flex flex-col items-center gap-1.5"
-              >
-                <span
-                  className={`flex h-11 w-11 items-center justify-center rounded-2xl text-xl ${s.bg}`}
-                >
-                  {s.emoji}
+              <div className="relative flex items-center justify-between border-t border-white/75 px-4 py-2.5">
+                <span className="text-[10px] text-ink-muted">
+                  点击查看完整玩偶档案
                 </span>
-                <span className="text-[11px] text-ink-soft">{s.label}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setToyPickerOpen((open) => !open)
+                  }}
+                  className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold text-matcha-deep shadow-sm"
+                  aria-expanded={toyPickerOpen}
+                >
+                  切换玩偶
+                  <ChevronDown
+                    className={`h-3 w-3 transition-transform ${toyPickerOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+              </div>
+            </article>
 
-        <div className="promo-banner relative overflow-hidden rounded-[1.25rem] px-4 py-3.5 text-white shadow-[var(--shadow-warm)]">
-          <div className="relative z-[1] max-w-[70%]">
-            <span className="rounded-full bg-white/25 px-2 py-0.5 text-[10px]">
-              小贴士
-            </span>
-            <p className="font-display mt-1.5 text-lg leading-snug">
-              给玩偶写一句今日独白吧～
-            </p>
-          </div>
-          <span className="absolute -right-1 bottom-0 text-5xl opacity-90">
-            🐹
-          </span>
-        </div>
-
-        <div>
-          <div className="mb-2.5 flex items-center justify-between px-0.5">
-            <h3 className="flex items-center gap-1.5 font-medium text-ink">
-              <BookOpen className="h-4 w-4 text-matcha-deep" />
-              最近记录
-            </h3>
-            {currentToy && (
-              <span className="text-xs text-ink-muted">{currentToy.name}</span>
+            {toyPickerOpen && (
+              <div className="absolute inset-x-2 top-full z-20 mt-2 rounded-2xl border border-line bg-white p-1.5 shadow-[var(--shadow-elevated)]">
+                {toys.map((toy, index) => {
+                  const selected = toy.id === currentToy.id
+                  return (
+                    <button
+                      key={toy.id}
+                      type="button"
+                      onClick={() => {
+                        setCurrentToyId(toy.id)
+                        setToyPickerOpen(false)
+                        showToast(`已切换到 ${toy.name} 的档案`)
+                      }}
+                      className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left ${
+                        selected ? 'bg-mist-soft' : 'active:bg-cream'
+                      }`}
+                    >
+                      <img
+                        src={toyAvatar(toy, index)}
+                        alt=""
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                      <span className="min-w-0 flex-1 truncate text-sm text-ink">
+                        {toy.name}
+                      </span>
+                      {selected && (
+                        <Check className="h-4 w-4 text-matcha-deep" strokeWidth={2.5} />
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
             )}
-          </div>
+          </section>
+        ) : (
+          <button
+            type="button"
+            onClick={() => navigate('/toys/new')}
+            className="card-paper w-full p-6 text-center"
+          >
+            <span className="text-3xl">🧸</span>
+            <p className="mt-2 text-sm font-medium text-ink">先创建一只玩偶</p>
+          </button>
+        )}
 
-          {!currentToy ? (
-            <EmptyState
-              title="还没有玩偶"
-              desc="先创建一只玩偶，再开始记录吧。"
-              action={
-                <Link to="/toys/new" className="btn-primary px-6 py-2.5 text-sm">
-                  新建玩偶
-                </Link>
-              }
-            />
-          ) : entries.length === 0 ? (
-            <EmptyState
-              emoji="📔"
-              title="还没有记录"
-              desc="点中间的 + 写一条旅行或日常日记。"
-              action={
-                <Link to="/compose" className="btn-primary px-6 py-2.5 text-sm">
-                  写一条
-                </Link>
-              }
-            />
-          ) : (
-            <div className="space-y-3">
-              {entries.map((e) => (
-                <EntryCard key={e.id} entry={e} />
-              ))}
+        <button
+          type="button"
+          onClick={() => setRecordSheetOpen(true)}
+          className="archive-quick-record group w-full text-left active:scale-[0.99] transition-transform"
+        >
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-matcha-deep shadow-sm">
+            <PenLine className="h-5 w-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <strong className="block font-display text-lg text-ink">记下此刻</strong>
+            <span className="mt-0.5 block text-[11px] text-ink-muted">
+              照片、拍摄或一句想对玩偶说的话
+            </span>
+          </span>
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-matcha text-white transition-transform group-active:translate-x-0.5">
+            <ChevronRight className="h-4 w-4" />
+          </span>
+        </button>
+
+        {currentToy && (
+          <button
+            type="button"
+            onClick={() => navigate(`/memories/${currentToy.id}`)}
+            className="archive-milestone-card w-full overflow-hidden text-left active:scale-[0.99] transition-transform"
+          >
+            <div className="relative z-[1] max-w-[65%]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/65 px-2.5 py-1 text-[10px] font-medium text-terra-deep">
+                <Sparkles className="h-3 w-3" />
+                陪伴纪念
+              </span>
+              {milestone.isToday ? (
+                <>
+                  <p className="mt-3 text-xs font-medium text-ink-soft">
+                    今天是我们认识的第 {days} 天
+                  </p>
+                  <p className="font-display mt-0.5 text-[2.25rem] leading-none text-ink">
+                    {days} DAYS
+                  </p>
+                  <p className="mt-2 text-[11px] leading-relaxed text-ink-soft">
+                    谢谢你把每一个普通日子，都变成我们的纪念日。
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="mt-3 font-display text-xl text-ink">下一次纪念</p>
+                  <p className="mt-1 text-xs leading-relaxed text-ink-soft">
+                    距离我们相识 {milestone.nextDays} 天还有{' '}
+                    <strong>{milestone.countdown}</strong> 天
+                  </p>
+                  <p className="mt-2 text-[10px] text-ink-muted">
+                    继续记录，我们会一起抵达。
+                  </p>
+                </>
+              )}
+              <span className="mt-3 inline-flex items-center text-[10px] font-semibold text-matcha-deep">
+                进入回忆展厅
+                <ChevronRight className="h-3.5 w-3.5" />
+              </span>
             </div>
-          )}
-        </div>
-      </div>
+            <div className="absolute -bottom-5 -right-2 h-36 w-36 rotate-6 overflow-hidden rounded-[2rem] border-[5px] border-white bg-white shadow-lg">
+              <img
+                src={avatar}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <Bell className="absolute right-32 top-5 h-4 w-4 rotate-12 text-terra-deep/60" />
+          </button>
+        )}
+      </main>
+
+      <RecordMethodSheet
+        open={recordSheetOpen}
+        onClose={() => setRecordSheetOpen(false)}
+      />
     </div>
   )
+}
+
+function getMilestone(days: number) {
+  const milestones = [30, 100, 365, 500, 1000]
+  if (milestones.includes(days)) {
+    return { isToday: true, nextDays: days, countdown: 0 }
+  }
+  const nextDays = milestones.find((value) => value > days) || days + 365
+  return { isToday: false, nextDays, countdown: nextDays - days }
 }
