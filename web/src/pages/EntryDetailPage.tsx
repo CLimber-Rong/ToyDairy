@@ -56,7 +56,10 @@ export function EntryDetailPage() {
     return (
       <>
         <PageHeader title="详情" back="/archive" soft />
-        <div className="py-16 text-center text-sm text-ink-muted">加载中…</div>
+        <div className="flex flex-col items-center gap-3 py-20 text-center text-sm text-ink-muted">
+          <div className="loading-pulse text-3xl">📔</div>
+          <p>加载中…</p>
+        </div>
       </>
     )
   }
@@ -72,7 +75,7 @@ export function EntryDetailPage() {
             type="button"
             onClick={onRegenerate}
             disabled={regen}
-            className="chip !py-1.5 !text-xs disabled:opacity-50"
+            className="chip inline-flex items-center gap-1 !py-1.5 !text-xs disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${regen ? 'animate-spin' : ''}`} />
             重写
@@ -81,40 +84,45 @@ export function EntryDetailPage() {
       />
       <article className="px-4 py-4">
         {entry.imageUrl && (
-          <div className="mb-4 overflow-hidden rounded-2xl shadow-[var(--shadow-warm)]">
+          <div className="mb-4 overflow-hidden rounded-[1.25rem] shadow-[var(--shadow-elevated)] ring-1 ring-line/40">
             <img
               src={entry.imageUrl}
               alt=""
-              className="max-h-64 w-full object-cover"
+              className="max-h-72 w-full object-cover"
             />
           </div>
         )}
 
-        <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
+        <div className="mb-3.5 flex flex-wrap items-center gap-2 text-xs">
           <span className="tag tag-mist">{ENTRY_TYPE_LABEL[entry.type]}</span>
-          <time className="text-ink-muted">{entry.date}</time>
+          <time className="tabular-nums text-ink-muted">{entry.date}</time>
           {entry.mood && <span className="tag tag-mustard">{entry.mood}</span>}
         </div>
 
         {entry.location && (
-          <p className="mb-3 flex items-center gap-1.5 text-sm text-ink-soft">
-            <MapPin className="h-4 w-4" />
+          <p className="mb-3.5 flex items-center gap-1.5 text-sm text-ink-soft">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-mist-soft">
+              <MapPin className="h-3.5 w-3.5 text-matcha-deep" />
+            </span>
             {entry.location}
           </p>
         )}
 
         {entry.userNote && (
-          <p className="mb-4 rounded-2xl bg-cream-dark px-3.5 py-2.5 text-sm text-ink-soft">
-            <span className="text-xs text-ink-muted">主人备注 · </span>
+          <p className="mb-4 rounded-2xl bg-gradient-to-br from-cream-dark to-cream px-3.5 py-3 text-sm leading-relaxed text-ink-soft ring-1 ring-line/40">
+            <span className="text-xs font-medium text-ink-muted">主人备注 · </span>
             {entry.userNote}
           </p>
         )}
 
         <div className="card-paper overflow-hidden">
-          <div className="bg-mustard-soft px-4 py-3">
-            <h2 className="font-display text-base text-ink">玩偶日记</h2>
+          <div className="bg-gradient-to-r from-mustard-soft via-peach-soft/60 to-mustard-soft px-4 py-3.5">
+            <h2 className="font-display flex items-center gap-2 text-base text-ink">
+              <span>✨</span>
+              玩偶日记
+            </h2>
           </div>
-          <div className="px-4 py-4">
+          <div className="px-4 py-5">
             <div className="whitespace-pre-wrap text-sm leading-7 text-ink-soft">
               {entry.aiDiary || '（暂无 AI 文案）'}
             </div>

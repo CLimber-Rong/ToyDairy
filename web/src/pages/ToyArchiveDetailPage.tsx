@@ -39,12 +39,17 @@ export function ToyArchiveDetailPage() {
   }
 
   const days = companionDays(toy)
-  const photos = archivePhotos(entries)
+  // Only trust global entries once AppContext has switched to this toy.
+  const ready = currentToy?.id === toy.id
+  const photos = ready ? archivePhotos(entries) : []
   const cities = new Set(
-    entries
-      .map((entry) => entry.location)
-      .filter((place): place is string => Boolean(place && place !== '家')),
+    ready
+      ? entries
+          .map((entry) => entry.location)
+          .filter((place): place is string => Boolean(place && place !== '家'))
+      : [],
   )
+  const entryCount = ready ? entries.length : 0
 
   return (
     <>
@@ -93,7 +98,7 @@ export function ToyArchiveDetailPage() {
         <section className="grid grid-cols-3 gap-2">
           {[
             { value: days, unit: '天', label: '陪伴日子', icon: CalendarDays },
-            { value: entries.length, unit: '篇', label: '共同记录', icon: BookHeart },
+            { value: entryCount, unit: '篇', label: '共同记录', icon: BookHeart },
             { value: cities.size, unit: '城', label: '到访足迹', icon: MapPinned },
           ].map((stat) => (
             <div key={stat.label} className="rounded-2xl border border-line/70 bg-white px-2 py-3 text-center shadow-[var(--shadow-warm-sm)]">

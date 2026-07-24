@@ -140,8 +140,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     api.resetDemo()
     await refreshToys()
     refreshCommunity()
+    // Keep entries in sync even when currentToyId is unchanged after reset.
+    const id = api.getCurrentToyId()
+    if (id) await refreshEntries(id)
+    else setEntries([])
     showToast('已恢复演示数据')
-  }, [refreshToys, refreshCommunity, showToast])
+  }, [refreshToys, refreshCommunity, refreshEntries, showToast])
 
   useEffect(() => {
     let cancelled = false
@@ -283,11 +287,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const listThread = useCallback(
     (peerToyId: string) => {
       if (!currentToyId) return []
-      return communityMessages.filter(
-        (m) =>
-          (m.fromToyId === currentToyId && m.toToyId === peerToyId) ||
-          (m.fromToyId === peerToyId && m.toToyId === currentToyId),
-      )
+      // Own profile "来信": all inbound messages to the current toy
+      if (peerToyId === currentToyId) {
+        return communityMessages
+          .filter((m) => m.toToyId === currentToyId)
+          .slice()
+          .sort(
+            (a, b) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+          )
+      }
+      return communityMessages
+        .filter(
+          (m) =>
+            (m.fromToyId === currentToyId && m.toToyId === peerToyId) ||
+            (m.fromToyId === peerToyId && m.toToyId === currentToyId),
+        )
+        .slice()
+        .sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        )
     },
     [communityMessages, currentToyId],
   )

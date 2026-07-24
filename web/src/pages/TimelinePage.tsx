@@ -42,12 +42,24 @@ export function TimelinePage() {
 
   return (
     <div className="min-h-full">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line/60 bg-white/95 px-4 py-3 backdrop-blur-md">
-        <h1 className="font-display text-xl tracking-wide text-ink">Toy Dairy</h1>
+      <header className="header-band sticky top-0 z-10 flex items-center justify-between px-4 py-3.5">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-paper/90 text-lg shadow-[var(--shadow-warm-sm)] ring-1 ring-line/40">
+            🧸
+          </span>
+          <div>
+            <h1 className="font-display text-xl leading-none tracking-wide text-ink">
+              Toy Dairy
+            </h1>
+            <p className="mt-0.5 text-[10px] tracking-widest text-ink-muted">
+              玩偶手帐
+            </p>
+          </div>
+        </div>
         <button
           type="button"
           onClick={() => showToast('暂时没有新的玩偶消息')}
-          className="relative flex h-9 w-9 items-center justify-center rounded-full bg-mustard-soft text-matcha-deep shadow-[var(--shadow-warm-sm)] active:scale-95"
+          className="relative flex h-9 w-9 items-center justify-center rounded-full bg-mustard-soft text-matcha-deep shadow-[var(--shadow-warm-sm)] ring-1 ring-line/30 transition-transform active:scale-95"
           aria-label="消息"
         >
           <MessageCircle className="h-5 w-5 fill-white/70" />

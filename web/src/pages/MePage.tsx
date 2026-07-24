@@ -101,12 +101,12 @@ export function MePage() {
 
   return (
     <div className="min-h-full">
-      <div className="header-band px-4 pb-4 pt-4">
-        <div className="flex items-center gap-3">
+      <div className="header-band pattern-soft px-4 pb-5 pt-4">
+        <div className="flex items-center gap-3.5">
           <button
             type="button"
             onClick={() => avatarInputRef.current?.click()}
-            className="group relative h-16 w-16 shrink-0 rounded-full bg-mustard-soft shadow-[var(--shadow-warm-sm)] ring-4 ring-paper/80 active:scale-95 transition-transform"
+            className="avatar-ring group relative h-[4.25rem] w-[4.25rem] shrink-0 rounded-full bg-gradient-to-br from-mustard-soft to-peach-soft transition-transform active:scale-95"
             aria-label="修改头像"
           >
             <img
@@ -175,7 +175,7 @@ export function MePage() {
           </div>
           <Link
             to="/me/settings"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-paper text-matcha-deep shadow-[var(--shadow-warm-sm)] active:opacity-80"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-paper text-matcha-deep shadow-[var(--shadow-warm-sm)] ring-1 ring-line/40 transition-transform active:scale-95"
             aria-label="设置"
           >
             <Settings className="h-5 w-5" />
