@@ -20,15 +20,6 @@ import {
 import { useApp } from '../context/AppContext'
 import { useTheme } from '../theme/ThemeProvider'
 
-const MENU_GRID = [
-  { icon: '⭐', label: '我的收藏' },
-  { icon: '📋', label: '成长详情' },
-  { icon: '🏅', label: '勋章馆' },
-  { icon: '🎨', label: '切换配色', to: '/me/settings' },
-  { icon: '⚙️', label: '设置', to: '/me/settings' },
-  { icon: '🔊', label: '声音设置', to: '/me/settings' },
-] as const
-
 const PROFILE_NAME_KEY = 'toydairy.profile.name'
 const PROFILE_AVATAR_KEY = 'toydairy.profile.avatar'
 const DEFAULT_NAME = '今天不睡觉'
@@ -110,7 +101,7 @@ export function MePage() {
 
   return (
     <div className="min-h-full">
-      <div className="header-band pattern-soft px-4 pb-4 pt-4">
+      <div className="header-band px-4 pb-4 pt-4">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -190,7 +181,6 @@ export function MePage() {
             <Settings className="h-5 w-5" />
           </Link>
         </div>
-
       </div>
 
       <div className="space-y-3 px-4 pb-4 -mt-1">
@@ -212,46 +202,6 @@ export function MePage() {
               value={currentToy ? '1' : '0'}
               sub={currentToy?.name}
             />
-          </div>
-          <button
-            type="button"
-            className="mt-2 w-full text-center text-xs text-ink-muted"
-          >
-            前往统计详情 ›
-          </button>
-        </div>
-
-        <div className="card-paper px-2 py-4">
-          <div className="grid grid-cols-4 gap-y-4">
-            {MENU_GRID.map((m) => {
-              const body = (
-                <>
-                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cream text-xl">
-                    {m.icon}
-                  </span>
-                  <span className="text-[11px]">{m.label}</span>
-                </>
-              )
-              if ('to' in m && m.to) {
-                return (
-                  <Link
-                    key={m.label}
-                    to={m.to}
-                    className="flex flex-col items-center gap-1.5 text-ink-soft active:opacity-80"
-                  >
-                    {body}
-                  </Link>
-                )
-              }
-              return (
-                <div
-                  key={m.label}
-                  className="flex flex-col items-center gap-1.5 text-ink-soft"
-                >
-                  {body}
-                </div>
-              )
-            })}
           </div>
         </div>
 
