@@ -8,6 +8,15 @@ import {
   type ReactNode,
 } from 'react'
 import { api } from '../api/client'
+import { communityStore } from '../api/communityStore'
+import type {
+  CommunityComment,
+  CommunityFollow,
+  CommunityLike,
+  CommunityMessage,
+  CommunityPost,
+  CommunitySave,
+} from '../community/communityData'
 import type { Entry, Toy } from '../types'
 
 interface Toast {
@@ -26,6 +35,37 @@ interface AppContextValue {
   refreshEntries: (toyId?: string) => Promise<void>
   setCurrentToyId: (id: string) => void
   resetDemo: () => Promise<void>
+
+  // community
+  communityPosts: CommunityPost[]
+  communityComments: CommunityComment[]
+  communityLikes: CommunityLike[]
+  communitySaves: CommunitySave[]
+  communityFollows: CommunityFollow[]
+  communityMessages: CommunityMessage[]
+  communityUnread: number
+  refreshCommunity: () => void
+  publishCommunityPost: (input: {
+    body: string
+    imageUrl?: string
+    location?: string
+    tags?: string[]
+    kind?: CommunityPost['kind']
+  }) => Promise<CommunityPost | null>
+  toggleLike: (postId: string) => Promise<void>
+  toggleSave: (postId: string) => Promise<void>
+  toggleFollow: (toyId: string) => Promise<void>
+  addComment: (
+    postId: string,
+    body: string,
+  ) => Promise<{ comment: CommunityComment; npcReply?: CommunityComment } | null>
+  sendGreeting: (toToyId: string, body: string) => Promise<void>
+  listThread: (peerToyId: string) => CommunityMessage[]
+  isPostLiked: (postId: string) => boolean
+  isPostSaved: (postId: string) => boolean
+  isFollowingToy: (toyId: string) => boolean
+  postLikeCount: (post: CommunityPost) => number
+  postCommentCount: (postId: string) => number
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -37,6 +77,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState<Toast | null>(null)
 
+  const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([])
+  const [communityComments, setCommunityComments] = useState<
+    CommunityComment[]
+  >([])
+  const [communityLikes, setCommunityLikes] = useState<CommunityLike[]>([])
+  const [communitySaves, setCommunitySaves] = useState<CommunitySave[]>([])
+  const [communityFollows, setCommunityFollows] = useState<CommunityFollow[]>(
+    [],
+  )
+  const [communityMessages, setCommunityMessages] = useState<
+    CommunityMessage[]
+  >([])
+
   const showToast = useCallback((message: string) => {
     const id = Date.now()
     setToast({ id, message })
@@ -45,41 +98,50 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }, 2400)
   }, [])
 
+  const refreshCommunity = useCallback(() => {
+    const snap = api.communitySnapshot()
+    setCommunityPosts(snap.posts)
+    setCommunityComments(snap.comments)
+    setCommunityLikes(snap.likes)
+    setCommunitySaves(snap.saves)
+    setCommunityFollows(snap.follows)
+    setCommunityMessages(snap.messages)
+  }, [])
+
   const refreshToys = useCallback(async () => {
     const list = await api.listToys()
     setToys(list)
     const saved = api.getCurrentToyId()
     const next =
-      (saved && list.find((t) => t.id === saved)?.id) ||
-      list[0]?.id ||
-      null
+      (saved && list.find((t) => t.id === saved)?.id) || list[0]?.id || null
     setCurrentToyIdState(next)
     if (next) api.setCurrentToyId(next)
   }, [])
 
-  const refreshEntries = useCallback(async (toyId?: string) => {
-    const id = toyId ?? currentToyId
-    if (!id) {
-      setEntries([])
-      return
-    }
-    const list = await api.listEntries(id)
-    setEntries(list)
-  }, [currentToyId])
-
-  const setCurrentToyId = useCallback(
-    (id: string) => {
-      api.setCurrentToyId(id)
-      setCurrentToyIdState(id)
+  const refreshEntries = useCallback(
+    async (toyId?: string) => {
+      const id = toyId ?? currentToyId
+      if (!id) {
+        setEntries([])
+        return
+      }
+      const list = await api.listEntries(id)
+      setEntries(list)
     },
-    [],
+    [currentToyId],
   )
+
+  const setCurrentToyId = useCallback((id: string) => {
+    api.setCurrentToyId(id)
+    setCurrentToyIdState(id)
+  }, [])
 
   const resetDemo = useCallback(async () => {
     api.resetDemo()
     await refreshToys()
+    refreshCommunity()
     showToast('已恢复演示数据')
-  }, [refreshToys, showToast])
+  }, [refreshToys, refreshCommunity, showToast])
 
   useEffect(() => {
     let cancelled = false
@@ -87,6 +149,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setLoading(true)
       try {
         await refreshToys()
+        refreshCommunity()
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -94,7 +157,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true
     }
-  }, [refreshToys])
+  }, [refreshToys, refreshCommunity])
 
   useEffect(() => {
     if (!currentToyId) {
@@ -109,6 +172,154 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [toys, currentToyId],
   )
 
+  const communityUnread = useMemo(() => {
+    if (!currentToyId) return 0
+    return communityMessages.filter(
+      (m) => m.toToyId === currentToyId && !m.read,
+    ).length
+  }, [communityMessages, currentToyId])
+
+  const publishCommunityPost = useCallback(
+    async (input: {
+      body: string
+      imageUrl?: string
+      location?: string
+      tags?: string[]
+      kind?: CommunityPost['kind']
+    }) => {
+      if (!currentToyId) {
+        showToast('请先创建一只玩偶')
+        return null
+      }
+      const post = await api.createCommunityPost({
+        toyId: currentToyId,
+        ...input,
+      })
+      refreshCommunity()
+      return post
+    },
+    [currentToyId, refreshCommunity, showToast],
+  )
+
+  const toggleLike = useCallback(
+    async (postId: string) => {
+      if (!currentToyId) {
+        showToast('请先选择一只玩偶')
+        return
+      }
+      await api.toggleCommunityLike(postId, currentToyId)
+      refreshCommunity()
+    },
+    [currentToyId, refreshCommunity, showToast],
+  )
+
+  const toggleSave = useCallback(
+    async (postId: string) => {
+      if (!currentToyId) {
+        showToast('请先选择一只玩偶')
+        return
+      }
+      const saved = await api.toggleCommunitySave(postId, currentToyId)
+      refreshCommunity()
+      showToast(saved ? '已收藏到玩偶灵感夹' : '已取消收藏')
+    },
+    [currentToyId, refreshCommunity, showToast],
+  )
+
+  const toggleFollow = useCallback(
+    async (toyId: string) => {
+      if (!currentToyId) {
+        showToast('请先选择一只玩偶')
+        return
+      }
+      if (toyId === currentToyId) return
+      const following = await api.toggleCommunityFollow(toyId, currentToyId)
+      refreshCommunity()
+      showToast(following ? '已关注' : '已取消关注')
+    },
+    [currentToyId, refreshCommunity, showToast],
+  )
+
+  const addComment = useCallback(
+    async (postId: string, body: string) => {
+      if (!currentToyId) {
+        showToast('请先选择一只玩偶')
+        return null
+      }
+      const result = await api.addCommunityComment({
+        postId,
+        fromToyId: currentToyId,
+        body,
+        withNpcReply: true,
+      })
+      refreshCommunity()
+      showToast(
+        result.npcReply
+          ? '评论已发送，对方也回了一句'
+          : '评论已发送',
+      )
+      return result
+    },
+    [currentToyId, refreshCommunity, showToast],
+  )
+
+  const sendGreeting = useCallback(
+    async (toToyId: string, body: string) => {
+      if (!currentToyId) {
+        showToast('请先选择一只玩偶')
+        return
+      }
+      await api.sendCommunityMessage({
+        fromToyId: currentToyId,
+        toToyId,
+        body,
+      })
+      refreshCommunity()
+      showToast('打招呼已送达')
+    },
+    [currentToyId, refreshCommunity, showToast],
+  )
+
+  const listThread = useCallback(
+    (peerToyId: string) => {
+      if (!currentToyId) return []
+      return communityMessages.filter(
+        (m) =>
+          (m.fromToyId === currentToyId && m.toToyId === peerToyId) ||
+          (m.fromToyId === peerToyId && m.toToyId === currentToyId),
+      )
+    },
+    [communityMessages, currentToyId],
+  )
+
+  const isPostLiked = useCallback(
+    (postId: string) =>
+      communityStore.isLiked(postId, currentToyId, communityLikes),
+    [communityLikes, currentToyId],
+  )
+
+  const isPostSaved = useCallback(
+    (postId: string) =>
+      communityStore.isSaved(postId, currentToyId, communitySaves),
+    [communitySaves, currentToyId],
+  )
+
+  const isFollowingToy = useCallback(
+    (toyId: string) =>
+      communityStore.isFollowing(toyId, currentToyId, communityFollows),
+    [communityFollows, currentToyId],
+  )
+
+  const postLikeCount = useCallback(
+    (post: CommunityPost) => communityStore.likeCount(post, communityLikes),
+    [communityLikes],
+  )
+
+  const postCommentCount = useCallback(
+    (postId: string) => communityStore.commentCount(postId, communityComments),
+    [communityComments],
+  )
+
   const value = useMemo(
     () => ({
       toys,
@@ -121,6 +332,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshEntries,
       setCurrentToyId,
       resetDemo,
+      communityPosts,
+      communityComments,
+      communityLikes,
+      communitySaves,
+      communityFollows,
+      communityMessages,
+      communityUnread,
+      refreshCommunity,
+      publishCommunityPost,
+      toggleLike,
+      toggleSave,
+      toggleFollow,
+      addComment,
+      sendGreeting,
+      listThread,
+      isPostLiked,
+      isPostSaved,
+      isFollowingToy,
+      postLikeCount,
+      postCommentCount,
     }),
     [
       toys,
@@ -133,6 +364,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshEntries,
       setCurrentToyId,
       resetDemo,
+      communityPosts,
+      communityComments,
+      communityLikes,
+      communitySaves,
+      communityFollows,
+      communityMessages,
+      communityUnread,
+      refreshCommunity,
+      publishCommunityPost,
+      toggleLike,
+      toggleSave,
+      toggleFollow,
+      addComment,
+      sendGreeting,
+      listThread,
+      isPostLiked,
+      isPostSaved,
+      isFollowingToy,
+      postLikeCount,
+      postCommentCount,
     ],
   )
 

@@ -4,7 +4,16 @@
  * When backend is ready: set VITE_API_BASE and flip USE_MOCK = false.
  */
 
+import type {
+  CommunityComment,
+  CommunityMessage,
+  CommunityPost,
+} from '../community/communityData'
 import type { CreateEntryInput, CreateToyInput, Entry, Toy } from '../types'
+import {
+  communityStore,
+  type CreateCommunityPostInput,
+} from './communityStore'
 import { mockStore } from './mockStore'
 
 const USE_MOCK = true
@@ -79,5 +88,39 @@ export const api = {
 
   getCurrentToyId: () => mockStore.getCurrentToyId(),
   setCurrentToyId: (id: string | null) => mockStore.setCurrentToyId(id),
-  resetDemo: () => mockStore.resetDemo(),
+  resetDemo: () => {
+    mockStore.resetDemo()
+    communityStore.reset()
+  },
+
+  // —— Community (mock-first) ——
+  communitySnapshot: () => communityStore.snapshot(),
+  listCommunityPosts: (): Promise<CommunityPost[]> =>
+    communityStore.listPosts(),
+  listCommunityComments: (postId?: string): Promise<CommunityComment[]> =>
+    communityStore.listComments(postId),
+  createCommunityPost: (input: CreateCommunityPostInput) =>
+    communityStore.createPost(input),
+  toggleCommunityLike: (postId: string, fromToyId: string) =>
+    communityStore.toggleLike(postId, fromToyId),
+  toggleCommunitySave: (postId: string, fromToyId: string) =>
+    communityStore.toggleSave(postId, fromToyId),
+  toggleCommunityFollow: (followeeToyId: string, followerToyId: string) =>
+    communityStore.toggleFollow(followeeToyId, followerToyId),
+  addCommunityComment: (input: {
+    postId: string
+    fromToyId: string
+    body: string
+    withNpcReply?: boolean
+  }) => communityStore.addComment(input),
+  listCommunityMessages: (toyIdA: string, toyIdB: string) =>
+    communityStore.listMessages(toyIdA, toyIdB),
+  sendCommunityMessage: (input: {
+    fromToyId: string
+    toToyId: string
+    body: string
+  }): Promise<CommunityMessage> => communityStore.sendMessage(input),
+  markCommunityThreadRead: (readerToyId: string, peerToyId: string) =>
+    communityStore.markThreadRead(readerToyId, peerToyId),
+  communityUnreadCount: (toyId: string) => communityStore.unreadCount(toyId),
 }

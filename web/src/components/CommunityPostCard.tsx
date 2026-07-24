@@ -8,16 +8,28 @@ import {
   Send,
   Sparkles,
 } from 'lucide-react'
-import type { CommunityPost, CommunityToy } from '../community/communityData'
+import {
+  commentSuggestion,
+  formatRelativeTime,
+  type CommunityComment,
+  type CommunityPost,
+  type CommunityToy,
+} from '../community/communityData'
+import { resolveCommunityToy } from '../community/communityData'
+import type { Toy } from '../types'
 
 export function CommunityPostCard({
   post,
   toy,
   currentToyName,
+  currentToyId,
+  ownedToys,
+  comments,
   liked,
   saved,
   following,
   own,
+  likeCount,
   onLike,
   onSave,
   onFollow,
@@ -26,28 +38,35 @@ export function CommunityPostCard({
   post: CommunityPost
   toy: CommunityToy
   currentToyName: string
+  currentToyId: string | null
+  ownedToys: Toy[]
+  comments: CommunityComment[]
   liked: boolean
   saved: boolean
   following: boolean
   own: boolean
+  likeCount: number
   onLike: () => void
   onSave: () => void
   onFollow: () => void
-  onComment: () => void
+  onComment: (body: string) => Promise<void> | void
 }) {
   const [commentsOpen, setCommentsOpen] = useState(false)
   const [comment, setComment] = useState('')
-  const [sentComments, setSentComments] = useState<string[]>([])
-  const suggestion = post.location
-    ? `我也喜欢${post.location.split('·').at(-1)?.trim()}！下次也想和主人一起去看看～`
-    : '这个瞬间好温柔！下次也想和主人一起体验～'
+  const [sending, setSending] = useState(false)
+  const suggestion = commentSuggestion(post.location, currentToyName)
+  const postComments = comments.filter((c) => c.postId === post.id)
 
-  function sendComment() {
+  async function sendComment() {
     const value = comment.trim()
-    if (!value) return
-    setSentComments((items) => [...items, value])
-    setComment('')
-    onComment()
+    if (!value || sending) return
+    setSending(true)
+    try {
+      await onComment(value)
+      setComment('')
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -69,7 +88,7 @@ export function CommunityPostCard({
             </span>
           </div>
           <p className="mt-0.5 truncate text-[10px] text-ink-muted">
-            {post.time}
+            {formatRelativeTime(post.createdAt)}
             {post.location ? ` · ${post.location}` : ''}
           </p>
         </Link>
@@ -120,19 +139,27 @@ export function CommunityPostCard({
         <div className="mt-3 flex items-center border-t border-line/60 pt-2.5">
           <ActionButton
             active={liked}
-            label={String(post.likes + (liked ? 1 : 0))}
-            icon={<Heart className={`h-[18px] w-[18px] ${liked ? 'fill-current' : ''}`} />}
+            label={String(likeCount)}
+            icon={
+              <Heart
+                className={`h-[18px] w-[18px] ${liked ? 'fill-current' : ''}`}
+              />
+            }
             onClick={onLike}
           />
           <ActionButton
-            label={String(post.comments + sentComments.length)}
+            label={String(postComments.length)}
             icon={<MessageCircle className="h-[18px] w-[18px]" />}
             onClick={() => setCommentsOpen((open) => !open)}
           />
           <ActionButton
             active={saved}
             label={saved ? '已收藏' : '收藏'}
-            icon={<Bookmark className={`h-[18px] w-[18px] ${saved ? 'fill-current' : ''}`} />}
+            icon={
+              <Bookmark
+                className={`h-[18px] w-[18px] ${saved ? 'fill-current' : ''}`}
+              />
+            }
             onClick={onSave}
           />
         </div>
@@ -153,24 +180,57 @@ export function CommunityPostCard({
             <span className="ml-1 text-matcha-deep">点击使用</span>
           </button>
 
-          {sentComments.map((item) => (
-            <p key={item} className="mt-2 text-[11px] text-ink-soft">
-              <strong className="mr-1 text-ink">{currentToyName}：</strong>
-              {item}
-            </p>
-          ))}
+          <div className="mt-2.5 max-h-48 space-y-2 overflow-y-auto">
+            {postComments.length === 0 ? (
+              <p className="text-[11px] text-ink-muted">还没有评论，来打个招呼吧</p>
+            ) : (
+              postComments.map((item) => {
+                const author =
+                  resolveCommunityToy(item.fromToyId, ownedToys) ||
+                  ({
+                    id: item.fromToyId,
+                    name: '玩偶',
+                    emoji: '🧸',
+                    accent: '#e8f5ee',
+                  } as CommunityToy)
+                const isMe = item.fromToyId === currentToyId
+                return (
+                  <div key={item.id} className="flex gap-2 text-[11px]">
+                    <span
+                      className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm"
+                      style={{ background: author.accent }}
+                    >
+                      {author.emoji}
+                    </span>
+                    <p className="min-w-0 flex-1 leading-relaxed text-ink-soft">
+                      <strong className="mr-1 text-ink">
+                        {isMe ? currentToyName : author.name}
+                      </strong>
+                      {item.body}
+                      <span className="ml-1.5 text-[10px] text-ink-muted">
+                        {formatRelativeTime(item.createdAt)}
+                      </span>
+                    </p>
+                  </div>
+                )
+              })
+            )}
+          </div>
 
           <div className="mt-2.5 flex items-center gap-2">
             <input
               value={comment}
               onChange={(e) => setComment(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') void sendComment()
+              }}
               placeholder={`以 ${currentToyName} 的身份评论…`}
               className="min-w-0 flex-1 rounded-full border border-line bg-white px-3 py-2 text-xs text-ink outline-none focus:border-matcha"
             />
             <button
               type="button"
-              onClick={sendComment}
-              disabled={!comment.trim()}
+              onClick={() => void sendComment()}
+              disabled={!comment.trim() || sending}
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-matcha text-white disabled:opacity-40"
               aria-label="发送评论"
             >

@@ -12,16 +12,11 @@ import {
   X,
 } from 'lucide-react'
 import {
-  COMMUNITY_POSTS,
-  INITIAL_FOLLOWING,
-  INITIAL_SAVED,
-  getCommunityToy,
-  type CommunityPost,
-  type CommunityToy,
+  ownedToyAvatar,
+  resolveCommunityToy,
 } from '../community/communityData'
 import { CommunityPostCard } from '../components/CommunityPostCard'
 import { useApp } from '../context/AppContext'
-import type { Toy } from '../types'
 
 type CommunityTab = 'discover' | 'following' | 'saved'
 
@@ -31,7 +26,7 @@ const TABS: { id: CommunityTab; label: string }[] = [
   { id: 'saved', label: '收藏' },
 ]
 
-const TOPICS = ['为你推荐', '旅行搭子', '同城玩偶', '性格相似']
+const TOPICS = ['为你推荐', '旅行搭子', '同城玩偶', '性格相似'] as const
 
 export function CommunityPage() {
   const {
@@ -40,76 +35,82 @@ export function CommunityPage() {
     entries,
     setCurrentToyId,
     showToast,
+    communityPosts,
+    communityComments,
+    publishCommunityPost,
+    toggleLike,
+    toggleSave,
+    toggleFollow,
+    addComment,
+    isPostLiked,
+    isPostSaved,
+    isFollowingToy,
+    postLikeCount,
   } = useApp()
+
   const [tab, setTab] = useState<CommunityTab>('discover')
-  const [topic, setTopic] = useState(TOPICS[0])
+  const [topic, setTopic] = useState<(typeof TOPICS)[number]>(TOPICS[0])
   const [identityOpen, setIdentityOpen] = useState(false)
   const [publishOpen, setPublishOpen] = useState(false)
   const [draft, setDraft] = useState('')
   const [shareLatest, setShareLatest] = useState(true)
-  const [posts, setPosts] = useState<CommunityPost[]>(COMMUNITY_POSTS)
-  const [liked, setLiked] = useState<Set<string>>(() => new Set())
-  const [saved, setSaved] = useState<Set<string>>(
-    () => new Set(INITIAL_SAVED),
-  )
-  const [following, setFollowing] = useState<Set<string>>(
-    () => new Set(INITIAL_FOLLOWING),
-  )
+  const [publishing, setPublishing] = useState(false)
 
   const latestEntry = entries[0]
+
   const filteredPosts = useMemo(() => {
+    let list = communityPosts
     if (tab === 'following') {
-      return posts.filter((post) => following.has(post.toyId))
+      list = list.filter((post) => isFollowingToy(post.toyId))
+    } else if (tab === 'saved') {
+      list = list.filter((post) => isPostSaved(post.id))
     }
-    if (tab === 'saved') {
-      return posts.filter((post) => saved.has(post.id))
+
+    if (tab === 'discover' && currentToy) {
+      if (topic === '旅行搭子') {
+        list = list.filter(
+          (p) =>
+            p.kind === 'travel' ||
+            p.tags.some((t) => /旅行|海边|火车/.test(t)) ||
+            Boolean(p.location),
+        )
+      } else if (topic === '同城玩偶') {
+        const home = currentToy.birthPlace
+        list = [...list].sort((a, b) => {
+          const aHit = a.location?.includes(home.slice(0, 2)) ? 1 : 0
+          const bHit = b.location?.includes(home.slice(0, 2)) ? 1 : 0
+          return bHit - aHit
+        })
+      } else if (topic === '性格相似') {
+        const traits = new Set(currentToy.traits)
+        list = [...list].sort((a, b) => {
+          const aToy = resolveCommunityToy(a.toyId, toys)
+          const bToy = resolveCommunityToy(b.toyId, toys)
+          const aScore =
+            aToy?.traits.filter((t) => traits.has(t)).length || 0
+          const bScore =
+            bToy?.traits.filter((t) => traits.has(t)).length || 0
+          return bScore - aScore
+        })
+      }
     }
-    return posts
-  }, [following, posts, saved, tab])
+    return list
+  }, [
+    communityPosts,
+    currentToy,
+    isFollowingToy,
+    isPostSaved,
+    tab,
+    topic,
+    toys,
+  ])
 
   const currentAvatar = ownedToyAvatar(
     currentToy?.id,
     toys.findIndex((toy) => toy.id === currentToy?.id),
   )
 
-  function toggleLiked(postId: string) {
-    setLiked((items) => {
-      const next = new Set(items)
-      if (next.has(postId)) next.delete(postId)
-      else next.add(postId)
-      return next
-    })
-  }
-
-  function toggleSaved(postId: string) {
-    setSaved((items) => {
-      const next = new Set(items)
-      if (next.has(postId)) {
-        next.delete(postId)
-        showToast('已取消收藏')
-      } else {
-        next.add(postId)
-        showToast('已收藏到玩偶灵感夹')
-      }
-      return next
-    })
-  }
-
-  function toggleFollowing(toyId: string) {
-    setFollowing((items) => {
-      const next = new Set(items)
-      if (next.has(toyId)) {
-        next.delete(toyId)
-        showToast('已取消关注')
-      } else {
-        next.add(toyId)
-        showToast(`已关注 ${getCommunityToy(toyId)?.name || '这只玩偶'}`)
-      }
-      return next
-    })
-  }
-
-  function publishPost() {
+  async function publishPost() {
     if (!currentToy) {
       showToast('请先创建一只玩偶')
       return
@@ -124,23 +125,25 @@ export function CommunityPage() {
       return
     }
 
-    const post: CommunityPost = {
-      id: `post_local_${Date.now()}`,
-      toyId: currentToy.id,
-      body: body || '今天也和主人一起，收藏了一个闪闪发光的瞬间。',
-      imageUrl: shareLatest ? latestEntry?.imageUrl : undefined,
-      location: shareLatest ? latestEntry?.location : undefined,
-      tags: [currentToy.traits[0] || '日常', shareLatest ? '旅行日志' : '玩偶日常'],
-      time: '刚刚',
-      likes: 0,
-      comments: 0,
-      kind: shareLatest ? 'diary' : 'daily',
+    setPublishing(true)
+    try {
+      await publishCommunityPost({
+        body: body || '今天也和主人一起，收藏了一个闪闪发光的瞬间。',
+        imageUrl: shareLatest ? latestEntry?.imageUrl : undefined,
+        location: shareLatest ? latestEntry?.location : undefined,
+        tags: [
+          currentToy.traits[0] || '日常',
+          shareLatest ? '旅行日志' : '玩偶日常',
+        ],
+        kind: shareLatest ? 'diary' : 'daily',
+      })
+      setPublishOpen(false)
+      setDraft('')
+      setTab('discover')
+      showToast(`已用 ${currentToy.name} 的身份发布`)
+    } finally {
+      setPublishing(false)
     }
-    setPosts((items) => [post, ...items])
-    setPublishOpen(false)
-    setDraft('')
-    setTab('discover')
-    showToast(`已用 ${currentToy.name} 的身份发布`)
   }
 
   return (
@@ -184,7 +187,9 @@ export function CommunityPage() {
               )}
             </span>
             <span className="min-w-0">
-              <span className="block text-[10px] text-ink-muted">当前社区身份</span>
+              <span className="block text-[10px] text-ink-muted">
+                当前社区身份
+              </span>
               <strong className="block truncate text-sm text-ink">
                 {currentToy?.name || '还没有玩偶'}
               </strong>
@@ -228,7 +233,10 @@ export function CommunityPage() {
                       {toy.name}
                     </span>
                     {selected && (
-                      <Check className="h-4 w-4 text-matcha-deep" strokeWidth={2.5} />
+                      <Check
+                        className="h-4 w-4 text-matcha-deep"
+                        strokeWidth={2.5}
+                      />
                     )}
                   </button>
                 )
@@ -266,7 +274,8 @@ export function CommunityPage() {
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold text-ink">为你发现新朋友</p>
                 <p className="mt-0.5 text-[10px] text-ink-muted">
-                  根据 {currentToy?.name || '玩偶'} 的性格、旅行地点和兴趣推荐
+                  根据 {currentToy?.name || '玩偶'}{' '}
+                  的性格、旅行地点和兴趣推荐
                 </p>
               </div>
               <UsersRound className="h-5 w-5 text-matcha-deep" />
@@ -295,11 +304,7 @@ export function CommunityPage() {
           <CommunityEmpty tab={tab} onDiscover={() => setTab('discover')} />
         ) : (
           filteredPosts.map((post) => {
-            const communityToy =
-              getCommunityToy(post.toyId) ||
-              toOwnedCommunityToy(
-                toys.find((toy) => toy.id === post.toyId),
-              )
+            const communityToy = resolveCommunityToy(post.toyId, toys)
             if (!communityToy) return null
             return (
               <CommunityPostCard
@@ -307,14 +312,18 @@ export function CommunityPage() {
                 post={post}
                 toy={communityToy}
                 currentToyName={currentToy?.name || '我的玩偶'}
-                liked={liked.has(post.id)}
-                saved={saved.has(post.id)}
-                following={following.has(post.toyId)}
+                currentToyId={currentToy?.id ?? null}
+                ownedToys={toys}
+                comments={communityComments}
+                liked={isPostLiked(post.id)}
+                saved={isPostSaved(post.id)}
+                following={isFollowingToy(post.toyId)}
                 own={toys.some((toy) => toy.id === post.toyId)}
-                onLike={() => toggleLiked(post.id)}
-                onSave={() => toggleSaved(post.id)}
-                onFollow={() => toggleFollowing(post.toyId)}
-                onComment={() => showToast('评论已发送')}
+                likeCount={postLikeCount(post)}
+                onLike={() => void toggleLike(post.id)}
+                onSave={() => void toggleSave(post.id)}
+                onFollow={() => void toggleFollow(post.toyId)}
+                onComment={(body) => addComment(post.id, body).then(() => {})}
               />
             )
           })
@@ -343,7 +352,9 @@ export function CommunityPage() {
                   className="h-9 w-9 rounded-full object-cover shadow-sm"
                 />
                 <div>
-                  <h2 className="font-display text-base text-ink">发布玩偶动态</h2>
+                  <h2 className="font-display text-base text-ink">
+                    发布玩偶动态
+                  </h2>
                   <p className="text-[10px] text-ink-muted">
                     以 {currentToy?.name || '玩偶'} 的第一视角分享
                   </p>
@@ -392,12 +403,16 @@ export function CommunityPage() {
                     同步最新旅行日志
                   </span>
                   <span className="mt-0.5 block truncate text-[10px] text-ink-muted">
-                    {latestEntry.title || latestEntry.location || latestEntry.date}
+                    {latestEntry.title ||
+                      latestEntry.location ||
+                      latestEntry.date}
                   </span>
                 </span>
                 <span
                   className={`flex h-5 w-5 items-center justify-center rounded-full ${
-                    shareLatest ? 'bg-matcha text-white' : 'border border-line bg-white'
+                    shareLatest
+                      ? 'bg-matcha text-white'
+                      : 'border border-line bg-white'
                   }`}
                 >
                   {shareLatest && <Check className="h-3 w-3" strokeWidth={3} />}
@@ -407,16 +422,19 @@ export function CommunityPage() {
 
             <div className="mt-3 flex items-center gap-1.5 rounded-xl bg-mustard-soft px-3 py-2 text-[10px] text-ink-soft">
               <Sparkles className="h-3.5 w-3.5 text-terra-deep" />
-              AI 会根据玩偶性格与地点润色为第一视角动态
+              以玩偶第一视角发布，其他玩偶可以点赞、评论和打招呼
             </div>
 
             <button
               type="button"
-              onClick={publishPost}
+              onClick={() => void publishPost()}
+              disabled={publishing}
               className="btn-primary mt-4 w-full py-3 text-sm"
             >
               <Send className="h-4 w-4" />
-              以 {currentToy?.name || '玩偶'} 的身份发布
+              {publishing
+                ? '发布中…'
+                : `以 ${currentToy?.name || '玩偶'} 的身份发布`}
             </button>
           </section>
         </div>
@@ -436,7 +454,11 @@ function CommunityEmpty({
   return (
     <div className="flex min-h-64 flex-col items-center justify-center text-center">
       <span className="flex h-14 w-14 items-center justify-center rounded-full bg-mist-soft text-matcha-deep">
-        {saved ? <Bookmark className="h-6 w-6" /> : <Compass className="h-6 w-6" />}
+        {saved ? (
+          <Bookmark className="h-6 w-6" />
+        ) : (
+          <Compass className="h-6 w-6" />
+        )}
       </span>
       <h2 className="mt-3 font-display text-lg text-ink">
         {saved ? '还没有收藏内容' : '关注列表还是空的'}
@@ -455,32 +477,4 @@ function CommunityEmpty({
       </button>
     </div>
   )
-}
-
-function ownedToyAvatar(id: string | undefined, index: number) {
-  if (id === 'toy_luna_demo' || index <= 0) return '/toy-cards/profile.jpg'
-  if (id === 'toy_bean_demo' || index === 1) return '/toy-cards/highlight-3.jpg'
-  return index % 2 === 0
-    ? '/toy-cards/highlight-2.jpg'
-    : '/toy-cards/highlight-1.jpg'
-}
-
-function toOwnedCommunityToy(toy: Toy | undefined): CommunityToy | undefined {
-  if (!toy) return undefined
-  return {
-    id: toy.id,
-    name: toy.name,
-    emoji: '🧸',
-    role: toy.role,
-    bio: toy.bio || `${toy.name} 的社区主页`,
-    traits: toy.traits,
-    interests: [toy.birthPlace, toy.role],
-    followers: 28,
-    following: 12,
-    likes: 136,
-    days: 1,
-    cities: 3,
-    trips: 4,
-    accent: '#e8f5ee',
-  }
 }
